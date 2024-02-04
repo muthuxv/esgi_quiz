@@ -1,0 +1,26 @@
+{
+  "development": {
+    "username": "root",
+    "password": "password",
+    "database": "app",
+    "host": "127.0.0.1",
+    "dialect": "postgres",
+    "port": 5439
+  },
+  "test": {
+    "username": "root",
+    "password": "password",
+    "database": "app",
+    "host": "127.0.0.1",
+    "dialect": "postgres",
+    "port": 5439
+  },
+  "production": {
+    "username": "root",
+    "password": "password",
+    "database": "app",
+    "host": "127.0.0.1",
+    "dialect": "postgres",
+    "port": 5439
+  }
+}
