@@ -10,13 +10,25 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      Question.belongsTo(models.Quiz, {
+        foreignKey: 'quiz_id',
+        onDelete: 'CASCADE'
+      });
     }
   }
   Question.init({
-    text: DataTypes.STRING,
-    type: DataTypes.ENUM('multiple', 'unique', 'text'),
-    quiz_id: DataTypes.INTEGER
+    text: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    type: {
+      type: DataTypes.ENUM('unique', 'multiple'),
+      allowNull: false
+    },
+    quiz_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    }
   }, {
     sequelize,
     modelName: 'Question',

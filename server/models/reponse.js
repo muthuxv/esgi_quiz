@@ -14,10 +14,22 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Reponse.init({
-    isCorrect: DataTypes.BOOLEAN,
-    user_id: DataTypes.INTEGER,
-    question_id: DataTypes.INTEGER,
-    option_id: DataTypes.INTEGER
+    isCorrect: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false
+    },
+    user_id: {
+      type: DataTypes.UUID,
+      allowNull: false
+    },
+    question_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    option_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    }
   }, {
     sequelize,
     modelName: 'Reponse',

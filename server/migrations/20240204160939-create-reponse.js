@@ -13,12 +13,15 @@ module.exports = {
         type: Sequelize.BOOLEAN
       },
       user_id: {
-        type: Sequelize.INTEGER
+        allowNull: false,
+        type: Sequelize.UUID
       },
       question_id: {
+        allowNull: false,
         type: Sequelize.INTEGER
       },
       option_id: {
+        allowNull: false,
         type: Sequelize.INTEGER
       },
       createdAt: {

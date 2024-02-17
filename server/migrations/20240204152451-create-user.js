@@ -22,6 +22,9 @@ module.exports = {
       role: {
         type: Sequelize.ENUM('admin', 'user'),
       },
+      room_id: {
+        type: Sequelize.UUID
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
