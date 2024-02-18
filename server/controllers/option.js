@@ -1,60 +1,58 @@
-module.exports = function OptionController(Option) {
+module.exports = function OptionController(OptionService) {
     return {
-        async create(req, res) {
+        getAll: async (req, res, next) => {
+            const { page, itemsPerPage, order, ...filters } = req.query;
             try {
-                const option = await Option.create(req.body);
-                return res.status(201).send(option);
-            } catch (error) {
-                return res.status(400).send(error);
+              const results = await OptionService.findAll(filters, {
+                order,
+                limit: itemsPerPage,
+                offset: (page - 1) * itemsPerPage,
+              });
+      
+              res.json(results);
+            } catch (err) {
+              next(err);
             }
-        },
-        async list(req, res) {
+          },
+        getOne: async function (req, res, next) {
             try {
-                const options = await Option.findAll();
-                return res.status(200).send(options);
-            } catch (error) {
-                return res.status(400).send(error);
-            }
-        },
-        async retrieve(req, res) {
-            try {
-                const option = await Option.findByPk(req.params.optionId);
+                const option = await OptionService.findOne(req.params);
                 if (!option) {
-                    return res.status(404).send({
-                        message: 'Option Not Found',
-                    });
+                    return res.status(404).end();
                 }
-                return res.status(200).send(option);
-            } catch (error) {
-                return res.status(400).send(error);
+                res.status(200).json(option);
+            } catch (e) {
+                next(e);
             }
         },
-        async update(req, res) {
+        create: async function (req, res, next) {
             try {
-                const option = await Option.findByPk(req.params.optionId);
-                if (!option) {
-                    return res.status(404).send({
-                        message: 'Option Not Found',
-                    });
-                }
-                await option.update(req.body);
-                return res.status(200).send(option);
-            } catch (error) {
-                return res.status(400).send(error);
+                const option = await OptionService.create(req.body);
+                res.status(201).json(option);
+            } catch (e) {
+                next(e);
             }
         },
-        async destroy(req, res) {
+        update: async function (req, res, next) {
             try {
-                const option = await Option.findByPk(req.params.optionId);
-                if (!option) {
-                    return res.status(404).send({
-                        message: 'Option Not Found',
-                    });
+                const options = await OptionService.update(req.params, req.body);
+                if (options.length === 0) {
+                    return res.status(404).end();
                 }
-                await option.destroy();
-                return res.status(204).send();
-            } catch (error) {
-                return res.status(400).send(error);
+                res.status(200).json(options[0]);
+            } catch (e) {
+                next(e);
+            }
+        },
+        delete: async function (req, res, next) {
+            try {
+                const nbDeleted = await OptionService.delete(req.params);
+                if (nbDeleted === 0) {
+                    return res.status(404).end();
+                }
+                res.status(204).end();
+            } catch (e) {
+                next(e);
             }
         },
     };

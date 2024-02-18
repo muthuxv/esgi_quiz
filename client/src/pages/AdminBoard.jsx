@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Typography, Button, Grid, Box} from "@mui/material";
 import QuizTable from "../components/QuizTable";
 import { useNavigate } from "react-router-dom";
@@ -9,22 +9,94 @@ import QuizForm from "../components/forms/QuizForm";
 const AdminBoard = () => {
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
+    const [quizzes, setQuizzes] = useState([]);
 
-    const handleClickOpen = () => {
-        setOpen(true);
-    }
+    const handleClickOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
 
-    const handleClose = () => {
-        setOpen(false);
-    }
+    const fetchQuizzes = async () => {
+        try {
+            const response = await fetch('http://localhost:3001/quizzes');
+            const data = await response.json();
+            setQuizzes(data);
+        } catch (error) {
+            console.error('Error fetching quizzes:', error);
+        }
+    };
 
-    const handleCreate = (quizData) => {
-        // Handle the quiz data here, e.g., send it to the server
-        console.log(quizData);
-        handleClose(); // Close the dialog after handling the data
-      };
+    const handleCreate = async (quizData) => {
+        try {
+            // Step 1: Create the quiz
+            const quizResponse = await fetch('http://localhost:3001/quizzes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: quizData.title,
+                    description: quizData.description,
+                })
+            });
+            const quizDataResponse = await quizResponse.json();
+            console.log('Quiz created successfully:', quizDataResponse);
+    
+            // Step 2: Add questions
+            for (const question of quizData.questions) {
+                const questionResponse = await fetch('http://localhost:3001/questions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: question.text,
+                        type: question.type,
+                        quiz_id: quizDataResponse.id,
+                    })
+                });
+                const questionDataResponse = await questionResponse.json();
+                console.log('Question added successfully:', questionDataResponse);
+    
+                // Step 3: Add options for each question
+                for (const option of question.options) {
+                    const optionResponse = await fetch('http://localhost:3001/options', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            option_text: option.text,
+                            isCorrect: option.correct,
+                            question_id: questionDataResponse.id,
+                        })
+                    });
+                    const optionDataResponse = await optionResponse.json();
+                    console.log('Option added successfully:', optionDataResponse);
+                }
+            }
 
+            handleClose();
+            fetchQuizzes();
+        } catch (error) {
+            console.error('Error creating quiz:', error);
+        }
+    };
+    
 
+    const handleDelete = async (id) => {
+        try {
+            await fetch(`http://localhost:3001/quizzes/${id}`, {
+                method: 'DELETE',
+            });
+
+            fetchQuizzes();
+        } catch (error) {
+            console.error('Error deleting quiz:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchQuizzes();
+    }, []);
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: "1em" }} >
@@ -38,7 +110,7 @@ const AdminBoard = () => {
             </Box>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={12} md={12}>
-                        <QuizTable />
+                        <QuizTable quizzes={quizzes} handleDelete={handleDelete} />
                         <Button variant="contained" color="secondary" sx={{ marginTop: '1em', boxShadow: '4' }} startIcon={<AddCircleOutlineOutlinedIcon />} onClick={handleClickOpen}>
                             Créer un nouveau quiz
                         </Button>

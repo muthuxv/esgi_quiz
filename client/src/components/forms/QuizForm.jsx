@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, FormControl, RadioGroup, Radio, FormControlLabel, FormLabel, Checkbox, FormGroup } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, FormControl, RadioGroup, Radio, FormControlLabel, FormLabel, Checkbox, FormGroup, Alert } from '@mui/material';
 
 const QuizForm = ({ open, handleClose, handleCreate }) => {
   const [quizTitle, setQuizTitle] = useState('');
   const [quizDescription, setQuizDescription] = useState('');
   const [questions, setQuestions] = useState([]);
+  const [error, setError] = useState('');
 
   const handleAddQuestion = () => {
     setQuestions([...questions, { type: 'unique', text: '', options: [{ text: '', correct: false }] }]);
@@ -47,6 +48,63 @@ const QuizForm = ({ open, handleClose, handleCreate }) => {
   };
 
   const handleSubmit = () => {
+    if (quizTitle.trim() === '') {
+      setError('Le titre du quiz ne peut pas être vide');
+      return;
+    }
+
+    if (questions.length === 0) {
+      setError('Vous devez ajouter au moins une question');
+      return;
+    }
+  
+    for (const question of questions) {
+      if (question.options.length < 2) {
+        setError('Chaque question doit avoir au moins deux options');
+        return;
+      }
+    }
+
+    // Check if question type is unique and if there is only one correct option
+    for (const question of questions) {
+      if (question.type === 'unique') {
+        let correctOptions = question.options.filter(option => option.correct);
+        if (correctOptions.length !== 1) {
+          setError('Une question de type unique doit avoir une seule bonne réponse');
+          return;
+        }
+      }
+    }
+
+    // Check if question type is multiple and if there is at least one correct option
+    for (const question of questions) {
+      if (question.type === 'multiple') {
+        let correctOptions = question.options.filter(option => option.correct);
+        if (correctOptions.length === 0) {
+          setError('Une question de type multiple doit avoir au moins une bonne réponse');
+          return;
+        }
+      }
+    }
+
+    // Check if question text is not empty
+    for (const question of questions) {
+      if (question.text.trim() === '') {
+        setError('Le texte de la question ne peut pas être vide');
+        return;
+      }
+    }
+
+    // Check if option text is not empty
+    for (const question of questions) {
+      for (const option of question.options) {
+        if (option.text.trim() === '') {
+          setError('Le texte de l\'option ne peut pas être vide');
+          return;
+        }
+      }
+    }
+  
     const quizData = {
       title: quizTitle,
       description: quizDescription,
@@ -54,11 +112,17 @@ const QuizForm = ({ open, handleClose, handleCreate }) => {
     };
     handleCreate(quizData);
   };
+  
 
   return (
     <Dialog open={open} onClose={handleClose}>
       <DialogTitle>Créer un quiz</DialogTitle>
       <DialogContent>
+        {error && 
+          <Alert severity="error" onClose={() => setError('')}>
+            {error}
+          </Alert>
+        }
         <TextField
           margin="dense"
           label="Titre du quiz"

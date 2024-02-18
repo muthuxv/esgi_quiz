@@ -1,13 +1,15 @@
 const { Router } = require("express");
 const OptionController = require("../controllers/option");
-const { Option } = require("../models");
-const router = Router();
-const optionController = OptionController(Option);
+const OptionService = require("../services/option");
 
+const router = Router();
+const optionService = OptionService();
+const optionController = OptionController(optionService);
+
+router.get("/", optionController.getAll);
+router.get("/:id", optionController.getOne);
 router.post("/", optionController.create);
-router.get("/", optionController.list);
-router.get("/:optionId", optionController.retrieve);
-router.put("/:optionId", optionController.update);
-router.delete("/:optionId", optionController.destroy);
+router.put("/:id", optionController.update);
+router.delete("/:id", optionController.delete);
 
 module.exports = router;

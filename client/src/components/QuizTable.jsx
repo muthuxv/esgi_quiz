@@ -1,5 +1,4 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
@@ -19,73 +18,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import Button from '@mui/material/Button';
 import { Alert } from '@mui/material';
 
-function Row(props) {
-  const { row } = props;
-  const [open, setOpen] = React.useState(false);
-
-  return (
-    <React.Fragment>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
-        <TableCell>
-          <IconButton
-            aria-label="expand row"
-            size="small"
-            onClick={() => setOpen(!open)}
-          >
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </TableCell>
-        <TableCell component="th" scope="row">
-          {row.name}
-        </TableCell>
-        <TableCell align="right">{row.calories}</TableCell>
-        <TableCell align="right">{row.fat}</TableCell>
-        <TableCell align="right">{row.carbs}</TableCell>
-        <TableCell align="right">{row.protein}</TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1 }}>
-              <Typography variant="h6" gutterBottom component="div">
-                History
-              </Typography>
-              <Table size="small" aria-label="purchases">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Customer</TableCell>
-                    <TableCell align="right">Amount</TableCell>
-                    <TableCell align="right">Total price ($)</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {row.history.map((historyRow) => (
-                    <TableRow key={historyRow.date}>
-                      <TableCell component="th" scope="row">
-                        {historyRow.date}
-                      </TableCell>
-                      <TableCell>{historyRow.customerId}</TableCell>
-                      <TableCell align="right">{historyRow.amount}</TableCell>
-                      <TableCell align="right">
-                        {Math.round(historyRow.amount * row.price * 100) / 100}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </React.Fragment>
-  );
-}
-
-export default function QuizTable() {
+export default function QuizTable( { quizzes, handleDelete } ) {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  const [quizzes, setQuizzes] = React.useState([]);
   const [open, setOpen] = React.useState(false);
 
   const handleChangePage = (event, newPage) => {
@@ -97,23 +32,8 @@ export default function QuizTable() {
     setPage(0);
   };
 
-  React.useEffect(() => {
-    async function fetchData() {
-      const response = await fetch('http://localhost:3001/quizzes');
-      const data = await response.json();
-      setQuizzes(data);
-    }
-    fetchData();
-  }
-  , []);
-
-  const handleDelete = async (id) => {
-    await fetch(`http://localhost:3001/quizzes/${id}`, {
-      method: 'DELETE'
-    });
-    const response = await fetch('http://localhost:3001/quizzes');
-    const data = await response.json();
-    setQuizzes(data);
+  const handleDeleteClick = (id) => {
+    handleDelete(id);
   }
 
   
@@ -152,11 +72,11 @@ export default function QuizTable() {
               <TableCell component="th" scope="row">
                 {quizz.title}
               </TableCell>
-              <TableCell align="right">{quizz.description.length > 50 ? quizz.description.substring(0, 50) + "..." : quizz.description}</TableCell>
+              <TableCell align="right">{quizz.description !== null && quizz.description.length > 50 ? quizz.description.substring(0, 50) + "..." : quizz.description}</TableCell>
               <TableCell align="right">{quizz.createdAt}</TableCell>
               <TableCell align="right">{quizz.updatedAt}</TableCell>
               <TableCell align="right">
-                <Button aria-label="delete" onClick={() => handleDelete(quizz.id)}>
+                <Button aria-label="delete" onClick={() => handleDeleteClick(quizz.id)}>
                   <DeleteIcon />
                 </Button>
                 <Button aria-label="edit">
@@ -169,8 +89,39 @@ export default function QuizTable() {
                 <Collapse in={open} timeout="auto" unmountOnExit>
                   <Box sx={{ margin: 1 }}>
                     <Typography variant="h6" gutterBottom component="div">
-                      Réponses
+                      Questions
                     </Typography>
+                    <Table size="small" aria-label="purchases">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Question</TableCell>
+                          <TableCell>Type</TableCell>
+                          <TableCell>Options</TableCell>
+                          <TableCell>Bonne réponse</TableCell>
+                          <TableCell>Actions</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {quizz.questions.map((question) => (
+                          <TableRow key={question.id}>
+                            <TableCell component="th" scope="row">
+                              {question.text}
+                            </TableCell>
+                            <TableCell>{question.type}</TableCell>
+                            <TableCell>{question.options.length}</TableCell>
+                            <TableCell><Alert>{question.options.filter(option => option.isCorrect).map(option => option.option_text).join(', ')}</Alert></TableCell>
+                            <TableCell>
+                              <Button aria-label="edit">
+                                <EditIcon />
+                              </Button>
+                              <Button aria-label="delete">
+                                <DeleteIcon />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </Box>
                 </Collapse>
               </TableCell>

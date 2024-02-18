@@ -1,91 +1,71 @@
 const { v4: uuidv4 } = require("uuid");
 const { isUUID } = require("validator");
 
-module.exports = function UserController(User) {
+module.exports = function UserController(UserService) {
   return {
-    async create(req, res) {
+    getAll: async (req, res, next) => {
+      const { page, itemsPerPage, order, ...filters } = req.query;
       try {
-        const user = await User.create({
-          id: uuidv4(),
-          login: req.body.login,
-          email: req.body.email,
-          password: req.body.password
+        const results = await UserService.findAll(filters, {
+          order,
+          limit: itemsPerPage,
+          offset: (page - 1) * itemsPerPage,
         });
-        res.status(201).send(user);
-      } catch (error) {
-        res.status(400).send(error);
+
+        res.json(results);
+      } catch (err) {
+        next(err);
       }
     },
-    async list(req, res) {
+    getOne: async (req, res, next) => {
       try {
-        const users = await User.findAll();
-        res.status(200).send(users);
-      } catch (error) {
-        res.status(400).send(error);
+        const user = await UserService.findOne({ id: req.params.id });
+        if (!user) {
+          return res.status(404).json({ error: "Utilisateur non trouvé." });
+        }
+        res.status(200).json(user);
+      } catch (err) {
+        next(err);
       }
     },
-    async retrieve(req, res) {
+    create: async (req, res, next) => {
+      try {
+        const user = req.body;
+        user.id = uuidv4();
+        const createdUser = await UserService.create(user);
+        res.status(201).json(createdUser);
+      } catch (err) {
+        next(err);
+      }
+    },
+    update: async (req, res, next) => {
+      try {
+        const user = req.body;
+        if (!isUUID(req.params.id)) {
+          return res.status(400).json({ error: "L'identifiant est invalide." });
+        }
+        const updatedUser = await UserService.update({ id: req.params.id }, user);
+        if (!updatedUser) {
+          return res.status(404).json({ error: "Utilisateur non trouvé." });
+        }
+        res.status(200).json(updatedUser);
+      } catch (err) {
+        next(err);
+      }
+    },
+    delete: async (req, res, next) => {
       try {
         if (!isUUID(req.params.id)) {
-          return res.status(400).send({
-            message: 'Invalid UUID',
-          });
+          return res.status(400).json({ error: "L'identifiant est invalide." });
         }
-        const user = await User.findByPk(req.params.id);
-        if (!user) {
-          return res.status(404).send({
-            message: 'User Not Found',
-          });
+        const deletedUser = await UserService.delete({ id: req.params.id });
+        if (!deletedUser) {
+          return res.status(404).json({ error: "Utilisateur non trouvé." });
         }
-        res.status(200).send(user);
+        res.status(204).end();
+      } catch (err) {
+        next(err);
       }
-        catch (error) {
-            res.status
-        }
     },
-    async update(req, res) {
-      try {
-        if (!isUUID(req.params.id)) {
-          return res.status(400).send({
-            message: 'Invalid UUID',
-          });
-        }
-        const user = await User.findByPk(req.params.id);
-        if (!user) {
-          return res.status(404).send({
-            message: 'User Not Found',
-          });
-        }
-        await user.update({
-          login: req.body.login,
-          email: req.body.email,
-          password: req.body.password,
-          role: req.body.role
-        });
-        res.status(200).send(user);
-      }
-        catch (error) {
-            res.status(400).send
-        }
-    },
-    async destroy(req, res) {
-        try {
-            if (!isUUID(req.params.id)) {
-            return res.status(400).send({
-                message: 'Invalid UUID',
-            });
-            }
-            const user = await User.findByPk(req.params.id);
-            if (!user) {
-            return res.status(404).send({
-                message: 'User Not Found',
-            });
-            }
-            await user.destroy();
-            res.status(204).send();
-        } catch (error) {
-            res.status(400).send(error);
-        }
-    }
   };
 }

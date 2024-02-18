@@ -1,4 +1,5 @@
 const express = require("express");
+require('dotenv').config();
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
@@ -48,5 +49,4 @@ io.on("connection", (socket) => {
 
 httpServer.listen(3001, () => {
     console.log("listening on *:3001");
-}
-);
+});

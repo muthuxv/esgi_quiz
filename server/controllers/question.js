@@ -1,61 +1,59 @@
-module.exports = function QuestionController(Question) {
+module.exports = function QuestionController(QuestionService) {
     return {
-        async create(req, res) {
-        try {
-            const question = await Question.create(req.body);
-            return res.status(201).send(question);
-        } catch (error) {
-            return res.status(400).send(error);
-        }
-        },
-        async list(req, res) {
-        try {
-            const questions = await Question.findAll();
-            return res.status(200).send(questions);
-        } catch (error) {
-            return res.status(400).send(error);
-        }
-        },
-        async retrieve(req, res) {
-        try {
-            const question = await Question.findByPk(req.params.questionId);
-            if (!question) {
-            return res.status(404).send({
-                message: 'Question Not Found',
-            });
+        getAll: async (req, res, next) => {
+            const { page, itemsPerPage, order, ...filters } = req.query;
+            try {
+              const results = await QuestionService.findAll(filters, {
+                order,
+                limit: itemsPerPage,
+                offset: (page - 1) * itemsPerPage,
+              });
+      
+              res.json(results);
+            } catch (err) {
+              next(err);
             }
-            return res.status(200).send(question);
-        } catch (error) {
-            return res.status(400).send(error);
-        }
-        },
-        async update(req, res) {
-        try {
-            const question = await Question.findByPk(req.params.questionId);
-            if (!question) {
-            return res.status(404).send({
-                message: 'Question Not Found',
-            });
+          },
+        getOne: async function (req, res, next) {
+            try {
+                const question = await QuestionService.findOne(req.params);
+                if (!question) {
+                    return res.status(404).end();
+                }
+                res.status(200).json(question);
+            } catch (e) {
+                next(e);
             }
-            await question.update(req.body);
-            return res.status(200).send(question);
-        } catch (error) {
-            return res.status(400).send(error);
-        }
         },
-        async destroy(req, res) {
-        try {
-            const question = await Question.findByPk(req.params.questionId);
-            if (!question) {
-            return res.status(404).send({
-                message: 'Question Not Found',
-            });
+        create: async function (req, res, next) {
+            try {
+                const question = await QuestionService.create(req.body);
+                res.status(201).json(question);
+            } catch (e) {
+                next(e);
             }
-            await question.destroy();
-            return res.status(204).send();
-        } catch (error) {
-            return res.status(400).send(error);
-        }
+        },
+        update: async function (req, res, next) {
+            try {
+                const questions = await QuestionService.update(req.params, req.body);
+                if (questions.length === 0) {
+                    return res.status(404).end();
+                }
+                res.status(200).json(questions[0]);
+            } catch (e) {
+                next(e);
+            }
+        },
+        delete: async function (req, res, next) {
+            try {
+                const nbDeleted = await QuestionService.delete(req.params);
+                if (nbDeleted === 0) {
+                    return res.status(404).end();
+                }
+                res.status(204).end();
+            } catch (e) {
+                next(e);
+            }
         },
     };
 }
