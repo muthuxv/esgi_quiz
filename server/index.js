@@ -8,6 +8,7 @@ const UserRoutes = require("./routes/user");
 const QuizRoutes = require("./routes/quiz");
 const QuestionRoutes = require("./routes/question");
 const OptionRoutes = require("./routes/option");
+const RoomRoutes = require("./routes/room");
 const SecurityRoutes = require("./routes/security");
 
 db.sequelize.sync({alter: true}).then(() => {
@@ -34,6 +35,7 @@ app.use("/users", UserRoutes);
 app.use("/quizzes", QuizRoutes);
 app.use("/questions", QuestionRoutes);
 app.use("/options", OptionRoutes);
+app.use("/rooms", RoomRoutes);
 app.use("/", SecurityRoutes);
 
 io.on('connection', (socket) => {
@@ -41,13 +43,13 @@ io.on('connection', (socket) => {
 
   socket.on('joinQuiz', (quizId, user) => {
     socket.join(quizId);
-    console.log(user + " Has logged")
+    console.log(user.login + " Has logged")
     io.to(quizId).emit('userJoined', user);
   });
 
   socket.on('leaveQuiz', (quizId, user) => {
     socket.leave(quizId);
-    console.log(user + " has logged out");
+    console.log(user.login + " has logged out");
     io.to(quizId).emit('userLeft', user);
   });
 

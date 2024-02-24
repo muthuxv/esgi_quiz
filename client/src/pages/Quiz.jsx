@@ -37,13 +37,15 @@ const Quiz = () => {
     const token = localStorage.getItem('token');
     if (token) {
       const decoded = jwtDecode(token);
-      socket.emit('joinQuiz', id, decoded.login);
+      const decodedUser = { login: decoded.login, id: decoded.id };
+      socket.emit('joinQuiz', id, decodedUser);
     }
     return () => {
       const token = localStorage.getItem('token');
       if (socket && token) {
           const decoded = jwtDecode(token);
-          socket.emit('leaveQuiz', id, decoded.login);
+          const decodedUser = { login: decoded.login, id: decoded.id };
+          socket.emit('leaveQuiz', id, decodedUser);
           socket.close();
       }
     };
