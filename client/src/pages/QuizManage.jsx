@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import {jwtDecode} from 'jwt-decode';
 import io from 'socket.io-client';
 
 const Quiz = () => {
@@ -10,9 +11,17 @@ const Quiz = () => {
   const [connectedUsers, setConnectedUsers] = useState([]);
   const [socket, setSocket] = useState(null);
 
+  const decoded = jwtDecode(localStorage.getItem('token'));
+  console.log(decoded);
+
   useEffect(() => {
-    const newSocket = io('http://195.35.29.110:3001');
+    const newSocket = io('http://localhost:3001');
     setSocket(newSocket);
+
+    newSocket.on('connect', () => {
+      const username = decoded.login;
+      newSocket.emit('joinQuiz', id, username);
+  });
 
     newSocket.on('userJoined', (user) => {
       setConnectedUsers(prevUsers => [...prevUsers, user]);
@@ -25,7 +34,7 @@ const Quiz = () => {
     const checkQuizExists = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`http://195.35.29.110:3001/quizzes/${id}`);
+        const response = await fetch(`http://localhost:3001/quizzes/${id}`);
         if (response.ok) {
           const data = await response.json();
           if (data) {
