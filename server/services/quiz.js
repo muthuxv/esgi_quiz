@@ -5,36 +5,49 @@ const ValidationError = require("../errors/ValidationError");
 module.exports = function QuizService() {
     return {
         findAll: async function (filters, options) {
-        let dbOptions = {
-            where: filters,
-            include: [
-                {
-                    model: Question,
-                    as: "questions",
-                    include: [
-                        {
-                            model: Option,
-                            as: "options",
-                        },
-                    ],
-                },
-            ],
-        };
-        options.order = {createdAt: "DESC"}
-        if (options.order) {
-            // => [["name", "ASC"], ["dob", "DESC"]]
-            dbOptions.order = Object.entries(options.order);
-        }
-        if (options.limit) {
-            dbOptions.limit = options.limit;
-            dbOptions.offset = options.offset;
-        }
-        return Quiz.findAll(dbOptions);
+            let dbOptions = {
+                where: filters,
+                include: [
+                    {
+                        model: Question,
+                        as: "questions",
+                        include: [
+                            {
+                                model: Option,
+                                as: "options",
+                            },
+                        ],
+                    },
+                ],
+            };
+            options.order = {createdAt: "DESC"}
+            if (options.order) {
+                dbOptions.order = Object.entries(options.order);
+            }
+            if (options.limit) {
+                dbOptions.limit = options.limit;
+                dbOptions.offset = options.offset;
+            }
+            return Quiz.findAll(dbOptions);
         },
         findOne: async function (filters) {
-        return Quiz.findOne({ 
-            where: filters,
-        });
+            let dbOptions = {
+                where: filters,
+                include: [
+                    {
+                        model: Question,
+                        as: "questions",
+                        include: [
+                            {
+                                model: Option,
+                                as: "options",
+                            },
+                        ],
+                    },
+                ],
+            };
+            
+            return Quiz.findOne(dbOptions);
         },
         create: async function (quiz) {
         return Quiz.create(quiz);

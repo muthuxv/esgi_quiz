@@ -1,7 +1,7 @@
 const express = require("express");
 require('dotenv').config();
-const { createServer } = require("http");
-const { Server } = require("socket.io");
+const http = require('http');
+const socketIo = require('socket.io');
 const cors = require("cors");
 const db = require("./models");
 const UserRoutes = require("./routes/user");
@@ -18,12 +18,14 @@ db.sequelize.sync({alter: true}).then(() => {
 
 const app = express();
 app.use(cors());
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
-    cors: {
-      origin: "http://localhost:3000",
-    }
-  });
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: "http://195.35.29.110:3000",
+    methods: ["GET", "POST"] 
+  }
+});
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -34,19 +36,27 @@ app.use("/questions", QuestionRoutes);
 app.use("/options", OptionRoutes);
 app.use("/", SecurityRoutes);
 
-io.on("connection", (socket) => {
-    console.log("a user connected");
-    
-    socket.on("chat message", (msg) => {
-        console.log("message: " + msg);
-        io.emit("chat message", msg);
-    });
-    
-    socket.on("disconnect", () => {
-        console.log("user disconnected");
-    });
+io.on('connection', (socket) => {
+  console.log('New client connected');
+
+  socket.on('joinQuiz', (quizId, user) => {
+    socket.join(quizId);
+    console.log(user + " Has logged")
+    io.to(quizId).emit('userJoined', user);
+  });
+
+  socket.on('leaveQuiz', (quizId, user) => {
+    socket.leave(quizId);
+    console.log(user + " has logged out");
+    io.to(quizId).emit('userLeft', user);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+  });
 });
 
-httpServer.listen(3001, () => {
+
+server.listen(3001, () => {
     console.log("listening on *:3001");
 });

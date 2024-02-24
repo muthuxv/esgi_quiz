@@ -16,7 +16,7 @@ const AdminBoard = () => {
 
     const fetchQuizzes = async () => {
         try {
-            const response = await fetch('http://localhost:3001/quizzes');
+            const response = await fetch('http://195.35.29.110:3001/quizzes');
             const data = await response.json();
             setQuizzes(data);
         } catch (error) {
@@ -27,7 +27,7 @@ const AdminBoard = () => {
     const handleCreate = async (quizData) => {
         try {
             // Step 1: Create the quiz
-            const quizResponse = await fetch('http://localhost:3001/quizzes', {
+            const quizResponse = await fetch('http://195.35.29.110:3001/quizzes', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -42,7 +42,7 @@ const AdminBoard = () => {
     
             // Step 2: Add questions
             for (const question of quizData.questions) {
-                const questionResponse = await fetch('http://localhost:3001/questions', {
+                const questionResponse = await fetch('http://195.35.29.110:3001/questions', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ const AdminBoard = () => {
     
                 // Step 3: Add options for each question
                 for (const option of question.options) {
-                    const optionResponse = await fetch('http://localhost:3001/options', {
+                    const optionResponse = await fetch('http://195.35.29.110:3001/options', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ const AdminBoard = () => {
 
     const handleDelete = async (id) => {
         try {
-            await fetch(`http://localhost:3001/quizzes/${id}`, {
+            await fetch(`http://195.35.29.110:3001/quizzes/${id}`, {
                 method: 'DELETE',
             });
 
