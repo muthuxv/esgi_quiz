@@ -12,6 +12,7 @@ const Game = () => {
     const [answerFeedback, setAnswerFeedback] = useState({ message: '', isCorrect: null });
     const [disableAnswers, setDisableAnswers] = useState(false);
     const [timer, setTimer] = useState(30);
+    const [optionCounters, setOptionCounters] = useState({});
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -21,7 +22,7 @@ const Game = () => {
         }
 
         if (!socketRef.current) {
-            socketRef.current = io('http://195.35.29.110:3001');
+            socketRef.current = io('http://localhost:3001');
         }
 
         socketRef.current.on('connect', () => {
@@ -50,8 +51,21 @@ const Game = () => {
               setCount(receivedCount);
               socketRef.current.emit('nextQuestion', roomId, quizId, receivedCount);
             }
-          });
-    }, [roomId, quizId, count]);
+        });
+
+        socketRef.current.on('updateOptionCounter', (receivedQuestionId, counters) => {
+            if (question && receivedQuestionId === question.id) {
+                setOptionCounters(prevCounters => ({
+                    ...prevCounters,
+                    ...counters
+                }));
+            }
+        });
+
+        return () => {
+            socketRef.current.off('updateOptionCounter');
+        };
+    }, [roomId, quizId, count, question]);
 
     const handleOptionClick = async (selectedOption) => {
         const token = localStorage.getItem('token');
@@ -115,7 +129,7 @@ const Game = () => {
                                                 margin: '5px',
                                             }}
                                         >
-                                            {option.option_text}
+                                            {option.option_text} ({optionCounters[option.id] || 0})
                                         </Button>
                                     ))}
                                     {answerFeedback.message && (
