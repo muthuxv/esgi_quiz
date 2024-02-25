@@ -85,6 +85,10 @@ io.on('connection', (socket) => {
     console.log(questionTimeByRoom);
   });
 
+  socket.on('sendChatMessage', (roomId, user, message) => {
+    io.to(roomId).emit('chatMessage', { user, message });
+  });
+
   socket.on('joinQuiz', (quizId, user) => {
     socket.join(quizId);
     console.log(user.login + " has joined the quiz");
