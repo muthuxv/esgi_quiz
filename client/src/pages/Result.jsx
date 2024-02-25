@@ -20,7 +20,7 @@ const Result = () => {
 
         const fetchQuizCorrectAnswers = async () => {
             try {
-                const response = await fetch(`http://195.35.29.110:3001/quizzes/${quizId}`);
+                const response = await fetch(`http://localhost:3001/quizzes/${quizId}`);
                 const data = await response.json();
                 setCorrectAnswers(data);
                 console.log('Correct answers:', data);
@@ -32,7 +32,7 @@ const Result = () => {
 
         const fetchUserAnswers = async () => {
             try {
-                const response = await fetch(`http://195.35.29.110:3001/responses?room_id=${roomId}&user_id=${userId}`);
+                const response = await fetch(`http://localhost:3001/responses?room_id=${roomId}&user_id=${userId}`);
                 const data = await response.json();
                 setUserAnswers(data);
                 console.log('User answers:', data);
@@ -44,7 +44,7 @@ const Result = () => {
 
         const fetchRanking = async () => {
             try {
-                const response = await fetch(`http://195.35.29.110:3001/responses?room_id=${roomId}`);
+                const response = await fetch(`http://localhost:3001/responses?room_id=${roomId}`);
                 const data = await response.json(); 
                 console.log('Ranking:', data);
                 setRanking(data);
@@ -65,7 +65,7 @@ const Result = () => {
         const decodedToken = jwtDecode(token);
         const userId = decodedToken.id;
         try {
-            fetch(`http://195.35.29.110:3001/users/${userId}`, {
+            fetch(`http://localhost:3001/users/${userId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

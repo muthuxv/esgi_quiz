@@ -14,7 +14,7 @@ const Register = () => {
         e.preventDefault();
 
         try {
-            const response = await fetch('http://195.35.29.110:3001/register', {
+            const response = await fetch('http://localhost:3001/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

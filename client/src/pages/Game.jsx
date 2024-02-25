@@ -49,7 +49,7 @@ const Game = () => {
         setCurrentUser(jwtDecode(token).login);
 
         if (!socketRef.current) {
-            socketRef.current = io('http://195.35.29.110:3001');
+            socketRef.current = io('http://localhost:3001');
         }
 
         socketRef.current.on('connect', () => {
@@ -149,7 +149,7 @@ const Game = () => {
         });
         // save the answer
         try {
-            const response = await fetch(`http://195.35.29.110:3001/responses`, {
+            const response = await fetch(`http://localhost:3001/responses`, {
               method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
