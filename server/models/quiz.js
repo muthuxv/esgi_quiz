@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'quiz_id',
         as: 'questions'
       });
+      Quiz.belongsTo(models.User, {
+        foreignKey: 'user_id',
+        onDelete: 'CASCADE'
+      });
     }
   }
   Quiz.init({
@@ -21,7 +25,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
-    description: DataTypes.STRING
+    description: DataTypes.STRING,
+    user_id: {
+      type: DataTypes.UUID,
+      allowNull: false
+    },
   }, {
     sequelize,
     modelName: 'Quiz',
