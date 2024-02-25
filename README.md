@@ -6,6 +6,11 @@
   JWT_SECRET=IiEri4_He1lS3GYNJSfYQ61s1-MhfmBy3I4QhVsCH6KC4hPH02lEn4u_7iY3ODEY
 ```
 
+## Dans les dossiers "client" et "server" faire la commande suivante:
+```bash
+  npm i
+```
+
 ## Installation du projet
 ```bash
   docker compose up -d
