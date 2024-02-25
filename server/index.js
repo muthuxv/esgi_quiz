@@ -36,6 +36,10 @@ function startQuestionTimer(roomId, quizId, questionId, count) {
     timeLeft--;
     io.to(roomId).emit('timer', timeLeft);
 
+    if (timeLeft === 3) {
+      io.to(roomId).emit('timerWarning', timeLeft);
+    }
+
     if (timeLeft <= 0) {
       clearInterval(interval);
       console.log("Times up");
@@ -57,7 +61,7 @@ app.use(cors());
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "http://195.35.29.110:3000",
     methods: ["GET", "POST"] 
   }
 });
@@ -111,7 +115,7 @@ io.on('connection', (socket) => {
   socket.on('nextQuestion', (roomId, quizId, count, shuffle = false) => {
     console.log('Next question:', roomId, quizId, 'Shuffle:', shuffle);
     socket.join(roomId);
-  
+
     fetch(`http://localhost:3001/quizzes/${quizId}`).then(response => {
       return response.json();
     }).then(data => {
@@ -120,7 +124,7 @@ io.on('connection', (socket) => {
       if (shuffle) {
         shuffleArray(questions);
       }
-  
+
       if (count >= questions.length) {
         console.log('Quiz has ended:', roomId, quizId);
         io.to(roomId).emit('quizEnded', roomId, quizId);
