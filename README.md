@@ -1,7 +1,10 @@
 
 # Quiz Time
 
-
+## Ajouter un fichier '.env' côté serveur avec comme contenu:
+```bash
+  JWT_SECRET=IiEri4_He1lS3GYNJSfYQ61s1-MhfmBy3I4QhVsCH6KC4hPH02lEn4u_7iY3ODEY
+```
 
 ## Installation du projet
 ```bash
