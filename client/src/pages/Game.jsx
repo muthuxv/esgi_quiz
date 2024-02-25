@@ -9,6 +9,7 @@ const Game = () => {
     const socketRef = useRef(null);
     const [question, setQuestion] = useState(null);
     const [count, setCount] = useState(0);
+    const [timer, setTimer] = useState(30);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -18,7 +19,7 @@ const Game = () => {
         }
 
         if (!socketRef.current) {
-            socketRef.current = io('http://localhost:3001');
+            socketRef.current = io('http://195.35.29.110:3001');
         }
 
         socketRef.current.on('connect', () => {
@@ -26,19 +27,26 @@ const Game = () => {
             socketRef.current.emit('nextQuestion', roomId, quizId, count);
         });
 
-        socketRef.current.on('nextQuestion', (receivedQuizId, receivedQuestion) => {
+        socketRef.current.on('timer', (timeLeft) => {
+            setTimer(timeLeft);
+        });
+    
+        socketRef.current.on('nextQuestion', (receivedQuizId, receivedQuestion, receivedCount) => {
             if (receivedQuizId === quizId) {
                 setQuestion(receivedQuestion);
+                setCount(receivedCount);
+                setTimer(30);
             }
         });
+        
 
-        socketRef.current.on('questionAnswered', (receivedRoomId, receivedQuizId, receivedQuestionId, receivedUser, receivedAnswer, receivedCount) => {
+        socketRef.current.on('answerQuestion', (receivedRoomId, receivedQuizId, receivedQuestionId, receivedUser, receivedAnswer, receivedCount) => {
             if (receivedRoomId === roomId && receivedQuizId === quizId) {
-                setCount(receivedCount);
-                socketRef.current.emit('nextQuestion', roomId, quizId, receivedCount);
+              console.log("Time's up, moving to next question");
+              setCount(receivedCount);
+              socketRef.current.emit('nextQuestion', roomId, quizId, receivedCount);
             }
-        }
-        );
+          });
     }, [roomId, quizId, count]);
 
     const handleOptionClick = (selectedOption) => {
@@ -56,6 +64,7 @@ const Game = () => {
                 <Grid item xs={12}>
                     <Paper>
                         <Box p={2}>
+                            <Typography variant="h5">Time left: {timer} seconds</Typography>
                             {question && (
                                 <>
                                     <Typography variant="h4">Question: {question.text}</Typography>
