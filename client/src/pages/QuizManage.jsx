@@ -17,7 +17,7 @@ const Quiz = () => {
     const decoded = jwtDecode(localStorage.getItem('token'));
     console.log(decoded);
 
-    const newSocket = io('http://localhost:3001');
+    const newSocket = io('http://195.35.29.110:3001');
     setSocket(newSocket);
 
     newSocket.on('connect', () => {
@@ -38,7 +38,7 @@ const Quiz = () => {
     const checkQuizExists = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`http://localhost:3001/quizzes/${id}`);
+        const response = await fetch(`http://195.35.29.110:3001/quizzes/${id}`);
         if (response.ok) {
           const data = await response.json();
           if (data) {
@@ -64,7 +64,7 @@ const Quiz = () => {
 
   const handleStartQuiz = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/rooms`, {
+      const response = await fetch(`http://195.35.29.110:3001/rooms`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ const Quiz = () => {
       if (response.ok) {
         const data = await response.json();
         await Promise.all(connectedUsers.map(user =>
-          fetch(`http://localhost:3001/users/${user.id}`, {
+          fetch(`http://195.35.29.110:3001/users/${user.id}`, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
