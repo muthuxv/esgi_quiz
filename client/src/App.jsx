@@ -19,9 +19,9 @@ function App() {
         <Routes>
           <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
           <Route path="/quiz/:id" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
-          <Route path="/quiz-manage/:id" element={<ProtectedRoute><QuizManage /></ProtectedRoute>} />
+          <Route path="/quiz-manage/:id" element={<ProtectedRoute requiredRoles={['ROLE_ADMIN']}><QuizManage /></ProtectedRoute>} />
           <Route path="/play/:roomId/:quizId" element={<ProtectedRoute><Game /></ProtectedRoute>} />
-          <Route path="/admin" element={<ProtectedRoute><AdminBoard /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute requiredRoles={['ROLE_ADMIN']}><AdminBoard /></ProtectedRoute>} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/find-quizzes" element={<ProtectedRoute><FindQuizzes /></ProtectedRoute>} />
