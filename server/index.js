@@ -18,9 +18,13 @@ let fetch;
 })();
 
 const questionTimers = new Map();
+const questionTimeByRoom = new Map();
 
 function startQuestionTimer(roomId, quizId, questionId, count) {
-  let timeLeft = 5;
+  let timeLeft = 10;
+  if(questionTimeByRoom.get(quizId) > 0){
+    timeLeft = questionTimeByRoom.get(quizId);
+  }
 
   if (questionTimers.has(roomId)) {
     clearInterval(questionTimers.get(roomId));
@@ -72,6 +76,12 @@ app.use("/", SecurityRoutes);
 io.on('connection', (socket) => {
   console.log('New client connected');
 
+  socket.on('changeQuestionTime', (roomId, newTime) => {
+    console.log(`Changing question time for room ${roomId} to ${newTime}`);
+    questionTimeByRoom.set(roomId, parseInt(newTime));
+    console.log(questionTimeByRoom);
+  });
+
   socket.on('joinQuiz', (quizId, user) => {
     socket.join(quizId);
     console.log(user.login + " has joined the quiz");
@@ -91,7 +101,6 @@ io.on('connection', (socket) => {
     fetch(`http://195.35.29.110:3001/quizzes/${quizId}`).then(response => {
       return response.json();
     }).then(data => {
-      console.log(data);
       const questions = data.questions;
 
       if (count >= questions.length) {
