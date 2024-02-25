@@ -36,6 +36,7 @@ const AdminBoard = () => {
                     title: quizData.title,
                     description: quizData.description,
                     user_id: jwtDecode(localStorage.getItem('token')).id,
+                    password: quizData.password,
                     isShuffle: false,
                 })
             });

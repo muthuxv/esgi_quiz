@@ -10,6 +10,19 @@ const Quiz = () => {
   const navigate = useNavigate();
   const [quizExists, setQuizExists] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [quiz, setQuiz] = useState();
+  const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [goodPassword, setGoodPassword] = useState(false);
+
+  const handlePasswordSubmit = () => {
+    if (password === quiz.password) {
+      setErrorMessage('');
+        setGoodPassword(true);
+    } else {
+      setErrorMessage('Mauvais mot de passe');
+    }
+  };
 
   const socketRef = useRef(null);
 
@@ -26,6 +39,7 @@ const Quiz = () => {
           const data = await response.json();
           if (data) {
             setQuizExists(true);
+            setQuiz(data);
           } else {
             navigate('/');
           }
@@ -81,19 +95,39 @@ const Quiz = () => {
   }
 
   return (
-    <Container>
-      <Paper elevation={3} style={{ padding: '20px', marginTop: '20px', textAlign: 'center', color: 'primary', backgroundColor:'primary' }}>
-        {quizExists ? (
-          <Typography variant="h4" component="h1" style={{ color: 'primary' }}>
-            En attente du début du quiz...
-          </Typography>
-        ) : (
-          <Typography variant="h4" component="h1">
-            Le quiz n'existe pas.
-          </Typography>
-        )}  
-      </Paper>
-    </Container>
+      <Container>
+        <Paper elevation={3} style={{ padding: '20px', marginTop: '20px', textAlign: 'center', color: 'primary', backgroundColor: 'primary' }}>
+          {quizExists ? (
+              !goodPassword ? (
+                  <div>
+                    {errorMessage && (
+                        <Typography variant="body2" color="error">
+                          {errorMessage}
+                        </Typography>
+                    )}
+
+                    <TextField
+                        label="Mot de passe du quiz"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <Button variant="contained" color="primary" onClick={handlePasswordSubmit}>
+                      Valider
+                    </Button>
+                  </div>
+              ) : (
+                  <Typography variant="h4" component="h1">
+                    En attente du début du quiz...
+                  </Typography>
+              )
+          ) : (
+              <Typography variant="h4" component="h1">
+                Le quiz n'existe pas.
+              </Typography>
+          )}
+        </Paper>
+      </Container>
   );
 };
 

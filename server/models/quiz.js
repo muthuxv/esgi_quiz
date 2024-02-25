@@ -34,6 +34,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       allowNull: false
     },
+    password: {
+        type: DataTypes.STRING,
+        allowNull: false
+    }
   }, {
     sequelize,
     modelName: 'Quiz',

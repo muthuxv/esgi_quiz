@@ -27,10 +27,17 @@ module.exports = function QuizController(QuizService) {
         },
         create: async function (req, res, next) {
             try {
-                const quiz = await QuizService.create(req.body);
+                const quizData = req.body;
+                const quiz = await QuizService.create(quizData);
                 res.status(201).json(quiz);
-            } catch (e) {
-                next(e);
+            } catch (error) {
+                console.error('Erreur lors de la création du quiz :', error);
+
+                if (error.name === 'SequelizeDatabaseError') {
+                    return res.status(400).json({ message: 'Erreur de base de données' });
+                }
+
+                next(error);
             }
         },
         update: async function (req, res, next) {

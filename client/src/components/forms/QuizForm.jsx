@@ -5,6 +5,7 @@ const QuizForm = ({ open, handleClose, handleCreate }) => {
   const [quizTitle, setQuizTitle] = useState('');
   const [quizDescription, setQuizDescription] = useState('');
   const [questions, setQuestions] = useState([]);
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleAddQuestion = () => {
@@ -109,6 +110,7 @@ const QuizForm = ({ open, handleClose, handleCreate }) => {
       title: quizTitle,
       description: quizDescription,
       questions,
+        password: password
     };
     handleCreate(quizData);
   };
@@ -136,6 +138,13 @@ const QuizForm = ({ open, handleClose, handleCreate }) => {
           fullWidth
           value={quizDescription}
           onChange={(e) => setQuizDescription(e.target.value)}
+        />
+        <TextField
+            margin="dense"
+            label="Mot de passe du quiz"
+            fullWidth
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
         />
         {questions.map((question, index) => (
           <div key={index}>
