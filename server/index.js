@@ -10,7 +10,6 @@ const QuestionRoutes = require("./routes/question");
 const OptionRoutes = require("./routes/option");
 const RoomRoutes = require("./routes/room");
 const SecurityRoutes = require("./routes/security");
-const { count } = require("console");
 
 db.sequelize.sync({alter: true}).then(() => {
     console.log("Drop and re-sync db.");
@@ -70,14 +69,18 @@ io.on('connection', (socket) => {
         return;
       }
 
-      io.to(roomId).emit('nextQuestion', quizId, questions[count]);
+      console.log('Emitting next question:', questions[count]);
+
+      io.to(roomId).emit('nextQuestion', quizId, questions[count], count);
     });
   });
 
-  socket.on('answerQuestion', (roomId, quizId, questionId, user, answer) => {
+  socket.on('answerQuestion', (roomId, quizId, questionId, user, answer, count) => {
     console.log('Answer question:', roomId, quizId, questionId, user, answer);
-    io.to(roomId).emit('userAnswered', user, answer);
+    socket.join(roomId);
+    socket.emit('questionAnswered', roomId, quizId, questionId, user, answer, count + 1);
   });
+  
 
   socket.on('leaveQuiz', (quizId, user) => {
     socket.leave(quizId);

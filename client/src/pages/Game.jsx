@@ -8,6 +8,7 @@ const Game = () => {
     const { roomId, quizId } = useParams();
     const socketRef = useRef(null);
     const [question, setQuestion] = useState(null);
+    const [count, setCount] = useState(0);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -22,7 +23,7 @@ const Game = () => {
 
         socketRef.current.on('connect', () => {
             console.log('Connected to server');
-            socketRef.current.emit('nextQuestion', roomId, quizId, 0);
+            socketRef.current.emit('nextQuestion', roomId, quizId, count);
         });
 
         socketRef.current.on('nextQuestion', (receivedQuizId, receivedQuestion) => {
@@ -31,19 +32,21 @@ const Game = () => {
             }
         });
 
-        return () => {
-            console.log('Disconnected from server');
-            socketRef.current.disconnect();
-        };
-    }, [roomId, quizId]);
+        socketRef.current.on('questionAnswered', (receivedRoomId, receivedQuizId, receivedQuestionId, receivedUser, receivedAnswer, receivedCount) => {
+            if (receivedRoomId === roomId && receivedQuizId === quizId) {
+                setCount(receivedCount);
+                socketRef.current.emit('nextQuestion', roomId, quizId, receivedCount);
+            }
+        }
+        );
+    }, [roomId, quizId, count]);
 
     const handleOptionClick = (selectedOption) => {
         const token = localStorage.getItem('token');
-
         const decoded = jwtDecode(token);
         const decodedUser = { login: decoded.login, id: decoded.id };
         console.log('Option selected:', selectedOption);
-        socketRef.current.emit('answerQuestion', roomId, quizId, question.id, decodedUser.id, selectedOption.id);
+        socketRef.current.emit('answerQuestion', roomId, quizId, question.id, decodedUser.id, selectedOption.id, count);
     };
 
     return (
