@@ -27,8 +27,7 @@ const AdminBoard = () => {
 
     const handleCreate = async (quizData) => {
         try {
-            // Step 1: Create the quiz
-            const quizResponse = await fetch('http://195.35.29.110:3001/quizzes', {
+            const quizResponse = await fetch('http://localhost:3001/quizzes', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -37,6 +36,7 @@ const AdminBoard = () => {
                     title: quizData.title,
                     description: quizData.description,
                     user_id: jwtDecode(localStorage.getItem('token')).id,
+                    isShuffle: false,
                 })
             });
             const quizDataResponse = await quizResponse.json();

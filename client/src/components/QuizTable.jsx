@@ -84,9 +84,6 @@ export default function QuizTable( { quizzes, handleDelete, handleRedirectToQuiz
                 <Button aria-label="redirectToQuizz" onClick={() => handleRedirectToQuizz(quizz.id)}>
                   <SubdirectoryArrowRightIcon />
                 </Button>
-                <Button aria-label="edit">
-                  <EditIcon />
-                </Button>
                 <Button aria-label="delete" onClick={() => handleDeleteClick(quizz.id)}>
                   <DeleteIcon />
                 </Button>
@@ -106,7 +103,6 @@ export default function QuizTable( { quizzes, handleDelete, handleRedirectToQuiz
                           <TableCell>Type</TableCell>
                           <TableCell>Options</TableCell>
                           <TableCell>Bonne réponse</TableCell>
-                          <TableCell>Actions</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -118,14 +114,6 @@ export default function QuizTable( { quizzes, handleDelete, handleRedirectToQuiz
                             <TableCell>{question.type}</TableCell>
                             <TableCell>{question.options.length}</TableCell>
                             <TableCell><Alert>{question.options.filter(option => option.isCorrect).map(option => option.option_text).join(', ')}</Alert></TableCell>
-                            <TableCell>
-                              <Button aria-label="edit">
-                                <EditIcon />
-                              </Button>
-                              <Button aria-label="delete">
-                                <DeleteIcon />
-                              </Button>
-                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
