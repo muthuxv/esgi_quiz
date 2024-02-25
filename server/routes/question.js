@@ -9,7 +9,7 @@ const questionController = QuestionController(questionService);
 router.get("/", questionController.getAll);
 router.get("/:id", questionController.getOne);
 router.post("/", questionController.create);
-router.put("/:id", questionController.update);
+router.patch("/:id", questionController.update);
 router.delete("/:id", questionController.delete);
 
 module.exports = router;

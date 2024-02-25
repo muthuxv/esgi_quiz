@@ -44,6 +44,7 @@ const Quiz = () => {
     if (token && socketRef.current) {
       const decoded = jwtDecode(token);
       const decodedUser = { login: decoded.login, id: decoded.id };
+      console.log(decodedUser);
       socketRef.current.emit('joinQuiz', id, decodedUser);
     }
 

@@ -10,6 +10,13 @@ const QuestionRoutes = require("./routes/question");
 const OptionRoutes = require("./routes/option");
 const RoomRoutes = require("./routes/room");
 const SecurityRoutes = require("./routes/security");
+const ResponseRoutes = require("./routes/response");
+
+let fetch;
+
+(async () => {
+  fetch = (await import('node-fetch')).default;
+})();
 
 db.sequelize.sync({alter: true}).then(() => {
     console.log("Drop and re-sync db.");
@@ -36,6 +43,7 @@ app.use("/quizzes", QuizRoutes);
 app.use("/questions", QuestionRoutes);
 app.use("/options", OptionRoutes);
 app.use("/rooms", RoomRoutes);
+app.use("/responses", ResponseRoutes);
 app.use("/", SecurityRoutes);
 
 io.on('connection', (socket) => {
@@ -81,7 +89,6 @@ io.on('connection', (socket) => {
     socket.emit('questionAnswered', roomId, quizId, questionId, user, answer, count + 1);
   });
   
-
   socket.on('leaveQuiz', (quizId, user) => {
     socket.leave(quizId);
     console.log(user.login + " has logged out");
