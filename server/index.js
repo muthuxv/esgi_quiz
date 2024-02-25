@@ -11,12 +11,36 @@ const OptionRoutes = require("./routes/option");
 const RoomRoutes = require("./routes/room");
 const SecurityRoutes = require("./routes/security");
 const ResponseRoutes = require("./routes/response");
+const { Console } = require("console");
 
 let fetch;
 
 (async () => {
   fetch = (await import('node-fetch')).default;
 })();
+
+const questionTimers = new Map();
+
+function startQuestionTimer(roomId, quizId, questionId, count) {
+  let timeLeft = 5;
+
+  if (questionTimers.has(roomId)) {
+    clearInterval(questionTimers.get(roomId));
+  }
+
+  const interval = setInterval(() => {
+    timeLeft--;
+    io.to(roomId).emit('timer', timeLeft);
+
+    if (timeLeft <= 0) {
+      clearInterval(interval);
+      console.log("Times up");
+      io.to(roomId).emit('answerQuestion', roomId, quizId, questionId, null, false, count + 1);
+    }
+  }, 1000);
+
+  questionTimers.set(roomId, interval);
+}
 
 db.sequelize.sync({alter: true}).then(() => {
     console.log("Drop and re-sync db.");
@@ -29,7 +53,7 @@ app.use(cors());
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "http://195.35.29.110:3000",
     methods: ["GET", "POST"] 
   }
 });
@@ -45,6 +69,7 @@ app.use("/options", OptionRoutes);
 app.use("/rooms", RoomRoutes);
 app.use("/responses", ResponseRoutes);
 app.use("/", SecurityRoutes);
+
 
 io.on('connection', (socket) => {
   console.log('New client connected');
@@ -65,7 +90,7 @@ io.on('connection', (socket) => {
     console.log('Next question:', roomId, quizId);
     socket.join(roomId);
 
-    fetch(`http://localhost:3001/quizzes/${quizId}`).then(response => {
+    fetch(`http://195.35.29.110:3001/quizzes/${quizId}`).then(response => {
       return response.json();
     }).then(data => {
       console.log(data);
@@ -77,6 +102,8 @@ io.on('connection', (socket) => {
         return;
       }
 
+      const questionId = questions[count].id;
+      startQuestionTimer(roomId, quizId, questionId, count);
       console.log('Emitting next question:', questions[count]);
 
       io.to(roomId).emit('nextQuestion', quizId, questions[count], count);
