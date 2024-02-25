@@ -10,6 +10,7 @@ const QuestionRoutes = require("./routes/question");
 const OptionRoutes = require("./routes/option");
 const RoomRoutes = require("./routes/room");
 const SecurityRoutes = require("./routes/security");
+const { count } = require("console");
 
 db.sequelize.sync({alter: true}).then(() => {
     console.log("Drop and re-sync db.");
@@ -22,7 +23,7 @@ app.use(cors());
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://195.35.29.110:3000",
+    origin: "http://localhost:3000",
     methods: ["GET", "POST"] 
   }
 });
@@ -51,6 +52,31 @@ io.on('connection', (socket) => {
     console.log('Quiz has started:', roomId, quizId);
     socket.join(quizId);
     io.to(quizId).emit('quizStarted', roomId, quizId);
+  });
+
+  socket.on('nextQuestion', (roomId, quizId, count) => {
+    console.log('Next question:', roomId, quizId);
+    socket.join(roomId);
+
+    fetch(`http://localhost:3001/quizzes/${quizId}`).then(response => {
+      return response.json();
+    }).then(data => {
+      console.log(data);
+      const questions = data.questions;
+
+      if (count >= questions.length) {
+        console.log('Quiz has ended:', roomId, quizId);
+        io.to(roomId).emit('quizEnded', quizId);
+        return;
+      }
+
+      io.to(roomId).emit('nextQuestion', quizId, questions[count]);
+    });
+  });
+
+  socket.on('answerQuestion', (roomId, quizId, questionId, user, answer) => {
+    console.log('Answer question:', roomId, quizId, questionId, user, answer);
+    io.to(roomId).emit('userAnswered', user, answer);
   });
 
   socket.on('leaveQuiz', (quizId, user) => {

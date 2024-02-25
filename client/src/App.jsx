@@ -20,7 +20,7 @@ function App() {
           <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
           <Route path="/quiz/:id" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
           <Route path="/quiz-manage/:id" element={<ProtectedRoute><QuizManage /></ProtectedRoute>} />
-          <Route path="/play/:id/:quizId" element={<ProtectedRoute><Game /></ProtectedRoute>} />
+          <Route path="/play/:roomId/:quizId" element={<ProtectedRoute><Game /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute><AdminBoard /></ProtectedRoute>} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

@@ -13,13 +13,13 @@ const Quiz = () => {
 
   useEffect(() => {
     if (!socketRef.current) {
-      socketRef.current = io('http://195.35.29.110:3001');
+      socketRef.current = io('http://localhost:3001');
     }
 
     const checkQuizExists = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`http://195.35.29.110:3001/quizzes/${id}`);
+        const response = await fetch(`http://localhost:3001/quizzes/${id}`);
         if (response.ok) {
           const data = await response.json();
           if (data) {
@@ -50,7 +50,7 @@ const Quiz = () => {
     socketRef.current.on('quizStarted', (roomId, quizId) => {
       try {
         console.log('Quiz has started:', roomId, quizId);
-        navigate(`play/${roomId}/${quizId}`);
+        navigate(`/play/${roomId}/${quizId}`);
       } catch (error) {
         console.error('Error navigating to play:', error);
       }
