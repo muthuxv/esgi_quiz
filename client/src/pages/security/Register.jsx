@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Container, Link, Paper, TextField } from '@mui/material';
+import { Box, Button, Container, Link, Paper, TextField, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 import logo from '../../assets/quiz_logo.png';
 
 const Register = () => {
@@ -8,6 +8,7 @@ const Register = () => {
     const [login, setLogin] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [role, setRole] = useState('');
 
     const handleRegister = async (e) => {
         e.preventDefault();
@@ -18,7 +19,7 @@ const Register = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ login, email, password }),
+                body: JSON.stringify({ login, email, password, role }),
             });
 
             if (response.ok) {
@@ -62,6 +63,19 @@ const Register = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
+                        <FormControl fullWidth margin="normal">
+                            <InputLabel id="role-select-label">Rôle</InputLabel>
+                            <Select
+                                labelId="role-select-label"
+                                id="role-select"
+                                value={role}
+                                label="Rôle"
+                                onChange={(e) => setRole(e.target.value)}
+                            >
+                                <MenuItem value="ROLE_USER">Utilisateur</MenuItem>
+                                <MenuItem value="ROLE_ADMIN">Administrateur</MenuItem>
+                            </Select>
+                        </FormControl>
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1em', marginTop: '1em' }}>
                             <Button type="submit" variant="contained" color="primary">
                                 S'inscrire

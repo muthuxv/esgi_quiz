@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 const Game = () => {
     const { roomId, quizId } = useParams();
     const socketRef = useRef(null);
+    const [quizInfo, setQuizInfo] = useState(null);
     const [question, setQuestion] = useState(null);
     const [count, setCount] = useState(0);
     const [answerFeedback, setAnswerFeedback] = useState({ message: '', isCorrect: null });
@@ -20,6 +21,24 @@ const Game = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        const fetchQuizInfo = async () => {
+            try {
+                const response = await fetch(`http://localhost:3001/quizzes/${quizId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch quiz details');
+                }
+                const data = await response.json();
+                setQuizInfo(data);
+                console.log('Quiz details:', data);
+            } catch (error) {
+                console.error('Error fetching quiz details:', error);
+            }
+        };
+    
+        fetchQuizInfo();
+    }, [quizId]);
+
+    useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) {
             console.error('No token found');
@@ -29,11 +48,6 @@ const Game = () => {
         if (!socketRef.current) {
             socketRef.current = io('http://localhost:3001');
         }
-
-        socketRef.current.on('connect', () => {
-            console.log('Connected to server');
-            socketRef.current.emit('nextQuestion', roomId, quizId, count);
-        });
 
         socketRef.current.on('timer', (timeLeft) => {
             setTimer(timeLeft);
@@ -82,6 +96,13 @@ const Game = () => {
             socketRef.current.off('chatMessage');
         };
     }, [roomId, quizId, count, question, navigate]);
+
+    useEffect(() => {
+        if (quizInfo) {
+            console.log('Connected to server and quizInfo is available');
+            socketRef.current.emit('nextQuestion', roomId, quizId, count, quizInfo.isShuffle);
+        }
+    }, [quizInfo, roomId, quizId, count]);
 
     const handleOptionClick = async (selectedOption) => {
         const token = localStorage.getItem('token');

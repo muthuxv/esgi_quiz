@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import io from 'socket.io-client';
-//mui
-import { Button, Grid, TextField, Typography, Box, Paper, Card, CardContent, CardActions, CardHeader, Alert } from '@mui/material';
+import { Button, Grid, TextField, Typography, Box, Paper, Card, CardContent, CardActions, CardHeader, Alert, Switch, FormControlLabel } from '@mui/material';
 
 const Quiz = () => {
   const { id } = useParams();
@@ -13,6 +12,7 @@ const Quiz = () => {
   const [connectedUsers, setConnectedUsers] = useState([]);
   const [socket, setSocket] = useState(null);
   const [questionTime, setQuestionTime] = useState(30);
+  const [isShuffle, setIsShuffle] = useState(false); 
 
   useEffect(() => {
     const decoded = jwtDecode(localStorage.getItem('token'));
@@ -34,6 +34,22 @@ const Quiz = () => {
 
     return () => newSocket.close();
   }, [id, connectedUsers]);
+
+  useEffect(() => {
+    const fetchQuizDetails = async () => {
+      try {
+        const response = await fetch(`http://localhost:3001/quizzes/${id}`);
+        if (response.ok) {
+          const quizDetails = await response.json();
+          setIsShuffle(quizDetails.isShuffle);
+        }
+      } catch (error) {
+        console.error('Error fetching quiz details:', error);
+      }
+    };
+
+    fetchQuizDetails();
+  }, [id]);
 
   useEffect(() => {
     const checkQuizExists = async () => {
@@ -97,17 +113,38 @@ const Quiz = () => {
     }
   };
 
+  const handleShuffleChange = async (event) => {
+    const newIsShuffle = event.target.checked;
+    try {
+      const response = await fetch(`http://localhost:3001/quizzes/${id}/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isShuffle: newIsShuffle }),
+      });
+      if (response.ok) {
+        setIsShuffle(newIsShuffle);
+        console.log(`Questions shuffle set to ${newIsShuffle}.`);
+      } else {
+        console.error('Error while setting questions shuffle:', response);
+      }
+    } catch (error) {
+      console.error('Error while setting questions shuffle:', error);
+    }
+  };
+
   return (
     <>
       {isLoading && <Alert severity="info">Loading...</Alert>}
       {quizData && (
         <>
-        <Typography variant="h4" sx={{ mb: 2 }}>Welcome to your quiz: {quizData.title}</Typography>
+        <Typography variant="h4" sx={{ mb: 2 }}>Bienvenue sur votre quiz: {quizData.title}</Typography>
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6} md={4}>
             <Paper>
               <Card>
-                <CardHeader title="List of Participants" />
+                <CardHeader title="Liste des participants" />
                 <CardContent>
                   {connectedUsers.map((user, index) => (
                     <Typography key={index} variant="body1" component="div">
@@ -115,8 +152,18 @@ const Quiz = () => {
                     </Typography>
                   ))}
                   <Button variant="contained" color="primary" onClick={handleStartQuiz}>
-                    Start Quiz
+                    Commencer le quiz
                   </Button>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={isShuffle}
+                        onChange={handleShuffleChange}
+                        color="primary"
+                      />
+                    }
+                    label="Mélanger les questions"
+                  />
                 </CardContent>
               </Card>
             </Paper>
@@ -124,16 +171,16 @@ const Quiz = () => {
           <Grid item xs={12} sm={6} md={4}>
             <Paper>
               <Card>
-                <CardHeader title="Change Question Time" />
+                <CardHeader title="Modifier le temps des questions" />
                 <CardContent>
                   <TextField
-                    label="Time in seconds"
+                    label="Temps en secondes"
                     type="number"
                     value={questionTime}
                     onChange={(e) => setQuestionTime(e.target.value)}
                   />
                   <Button variant="contained" color="primary" onClick={handleChangeQuestionTime}>
-                    Change Time
+                    Modifier le temps
                   </Button>
                 </CardContent>
               </Card>
@@ -142,7 +189,7 @@ const Quiz = () => {
           <Grid item xs={12} sm={6} md={4}>
             <Paper>
               <Card>
-                <CardHeader title="Number of Questions" />
+                <CardHeader title="Nombre de questions" />
                 <CardContent>
                   <Typography variant="body1">{quizData.questions.length}</Typography>
                 </CardContent>

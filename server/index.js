@@ -76,6 +76,13 @@ app.use("/", SecurityRoutes);
 
 const optionCounters = new Map();
 
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
 io.on('connection', (socket) => {
   console.log('New client connected');
 
@@ -101,28 +108,32 @@ io.on('connection', (socket) => {
     io.to(quizId).emit('quizStarted', roomId, quizId);
   });
 
-  socket.on('nextQuestion', (roomId, quizId, count) => {
-    console.log('Next question:', roomId, quizId);
+  socket.on('nextQuestion', (roomId, quizId, count, shuffle = false) => {
+    console.log('Next question:', roomId, quizId, 'Shuffle:', shuffle);
     socket.join(roomId);
-
+  
     fetch(`http://localhost:3001/quizzes/${quizId}`).then(response => {
       return response.json();
     }).then(data => {
-      const questions = data.questions;
-
+      let questions = data.questions;
+  
+      if (shuffle) {
+        shuffleArray(questions);
+      }
+  
       if (count >= questions.length) {
         console.log('Quiz has ended:', roomId, quizId);
         io.to(roomId).emit('quizEnded', roomId, quizId);
         return;
       }
-
+  
       const questionId = questions[count].id;
-
+  
       optionCounters.set(questionId, {});
-
+  
       startQuestionTimer(roomId, quizId, questionId, count);
       console.log('Emitting next question:', questions[count]);
-
+  
       io.to(roomId).emit('nextQuestion', quizId, questions[count], count);
       io.to(roomId).emit('resetOptionCounters');
     });
