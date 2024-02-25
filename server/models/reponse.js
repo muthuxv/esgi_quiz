@@ -10,7 +10,22 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      Reponse.belongsTo(models.User, {
+        foreignKey: 'user_id',
+        onDelete: 'CASCADE'
+      });
+      Reponse.belongsTo(models.Question, {
+        foreignKey: 'question_id',
+        onDelete: 'CASCADE'
+      });
+      Reponse.belongsTo(models.Option, {
+        foreignKey: 'option_id',
+        onDelete: 'CASCADE'
+      });
+      Reponse.belongsTo(models.Room, {
+        foreignKey: 'room_id',
+        onDelete: 'CASCADE'
+      });
     }
   }
   Reponse.init({
@@ -29,7 +44,11 @@ module.exports = (sequelize, DataTypes) => {
     option_id: {
       type: DataTypes.INTEGER,
       allowNull: false
-    }
+    },
+    room_id: {
+      type: DataTypes.UUID,
+      allowNull: false
+    },
   }, {
     sequelize,
     modelName: 'Reponse',

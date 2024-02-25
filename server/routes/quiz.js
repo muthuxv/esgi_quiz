@@ -9,7 +9,7 @@ const quizController = QuizController(quizService);
 router.get("/", quizController.getAll);
 router.get("/:id", quizController.getOne);
 router.post("/", quizController.create);
-router.put("/:id", quizController.update);
+router.patch("/:id", quizController.update);
 router.delete("/:id", quizController.delete);
 
 module.exports = router;

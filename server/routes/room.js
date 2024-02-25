@@ -9,7 +9,7 @@ const roomController = RoomController(roomService);
 router.get("/", roomController.getAll);
 router.get("/:id", roomController.getOne);
 router.post("/", roomController.create);
-router.put("/:id", roomController.update);
+router.patch("/:id", roomController.update);
 router.delete("/:id", roomController.delete);
 
 module.exports = router;
