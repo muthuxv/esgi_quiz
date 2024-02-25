@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import { jwtDecode } from 'jwt-decode';
@@ -9,7 +9,13 @@ const Quiz = () => {
   const [quizExists, setQuizExists] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const socketRef = useRef(null);
+
   useEffect(() => {
+    if (!socketRef.current) {
+      socketRef.current = io('http://195.35.29.110:3001');
+    }
+
     const checkQuizExists = async () => {
       try {
         setIsLoading(true);
@@ -33,30 +39,15 @@ const Quiz = () => {
     };
 
     checkQuizExists();
-    const socket = io('http://195.35.29.110:3001');
+
     const token = localStorage.getItem('token');
-    if (token) {
+    if (token && socketRef.current) {
       const decoded = jwtDecode(token);
       const decodedUser = { login: decoded.login, id: decoded.id };
-      socket.emit('joinQuiz', id, decodedUser);
+      socketRef.current.emit('joinQuiz', id, decodedUser);
     }
 
-    // Clean up function
-    return () => {
-      const token = localStorage.getItem('token');
-      if (socket && token) {
-        const decoded = jwtDecode(token);
-        const decodedUser = { login: decoded.login, id: decoded.id };
-        socket.emit('leaveQuiz', id, decodedUser);
-        socket.close();
-      }
-    };
-  }, [id, navigate]);
-
-  useEffect(() => {
-    const socket = io('http://localhost:3001');
-
-    socket.on('quizStarted', (roomId, quizId) => {
+    socketRef.current.on('quizStarted', (roomId, quizId) => {
       try {
         console.log('Quiz has started:', roomId, quizId);
         navigate(`play/${roomId}/${quizId}`);
@@ -65,8 +56,17 @@ const Quiz = () => {
       }
     });
 
-    return () => socket.close();
-  }, [navigate]);
+    return () => {
+      const token = localStorage.getItem('token');
+      if (socketRef.current && token) {
+        const decoded = jwtDecode(token);
+        const decodedUser = { login: decoded.login, id: decoded.id };
+        socketRef.current.emit('leaveQuiz', id, decodedUser);
+        socketRef.current.close();
+        socketRef.current = null;
+      }
+    };
+  }, [id, navigate]);
 
   if (isLoading) {
     return <div>Loading...</div>;

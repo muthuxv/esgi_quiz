@@ -64,7 +64,7 @@ const Quiz = () => {
 
   const handleStartQuiz = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/rooms`, {
+      const response = await fetch(`http://195.35.29.110:3001/rooms`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ const Quiz = () => {
       if (response.ok) {
         const data = await response.json();
         await Promise.all(connectedUsers.map(user =>
-          fetch(`http://localhost:3001/users/${user.id}`, {
+          fetch(`http://195.35.29.110:3001/users/${user.id}`, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
