@@ -54,7 +54,7 @@ Le back est accessible ici : http://localhost:3001
 - [@SimonBTSSio](https://github.com/SimonBTSSio)
 
 ```markdown
-  - Minuteur côté serveur
+  - Minuteur côté serveur (Peer programming avec Ayman)
   - Page quiz-manage pour l'admin
   - Réglage du temps par question en temps réel
   - Dockerisation
