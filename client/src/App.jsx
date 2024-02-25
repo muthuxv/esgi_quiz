@@ -6,6 +6,7 @@ import QuizManage from './pages/QuizManage';
 import Navbar from './components/Navbar';
 import AdminBoard from './pages/AdminBoard';
 import Game from './pages/Game';
+import Result from './pages/Result';
 import Login from './pages/security/Login';
 import Register from './pages/security/Register';
 import ForgotPassword from './pages/security/ForgotPassword';
@@ -22,6 +23,7 @@ function App() {
           <Route path="/quiz-manage/:id" element={<ProtectedRoute requiredRoles={['ROLE_ADMIN']}><QuizManage /></ProtectedRoute>} />
           <Route path="/play/:roomId/:quizId" element={<ProtectedRoute><Game /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute requiredRoles={['ROLE_ADMIN']}><AdminBoard /></ProtectedRoute>} />
+          <Route path="/results/:roomId/:quizId" element={<ProtectedRoute><Result /></ProtectedRoute>} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/find-quizzes" element={<ProtectedRoute><FindQuizzes /></ProtectedRoute>} />
