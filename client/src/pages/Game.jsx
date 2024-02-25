@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 import { useParams } from 'react-router-dom';
-import { Box, Typography, Grid, Paper, Button } from '@mui/material';
+import { Box, Typography, Grid, Paper, Button, TextField } from '@mui/material';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,6 +14,9 @@ const Game = () => {
     const [disableAnswers, setDisableAnswers] = useState(false);
     const [timer, setTimer] = useState(30);
     const [optionCounters, setOptionCounters] = useState({});
+    const [chatMessages, setChatMessages] = useState([]);
+    const [chatInput, setChatInput] = useState('');
+    const currentUser = jwtDecode(localStorage.getItem('token')).login;
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -64,6 +67,10 @@ const Game = () => {
             }
         });
 
+        socketRef.current.on('chatMessage', (message) => {
+            setChatMessages(prevMessages => [...prevMessages, message]);
+        });
+
         socketRef.current.on('quizEnded', (receivedRoomId, receivedQuizId) => {
             if (receivedRoomId === roomId && receivedQuizId === quizId) {
                 navigate(`/results/${roomId}/${quizId}`);
@@ -72,6 +79,7 @@ const Game = () => {
 
         return () => {
             socketRef.current.off('updateOptionCounter');
+            socketRef.current.off('chatMessage');
         };
     }, [roomId, quizId, count, question, navigate]);
 
@@ -114,7 +122,16 @@ const Game = () => {
         socketRef.current.emit('answerQuestion', roomId, quizId, question.id, decodedUser.id, selectedOption.id, count);
     };
 
-     return (
+    const sendChatMessage = (e) => {
+        e.preventDefault();
+        if (!chatInput.trim()) return; 
+
+        const user = jwtDecode(localStorage.getItem('token')).login;
+        socketRef.current.emit('sendChatMessage', roomId, user, chatInput);
+        setChatInput('');
+    };
+
+    return (
         <Box>
             <Typography variant="h3">Game</Typography>
             <Grid container spacing={2}>
@@ -155,6 +172,71 @@ const Game = () => {
                     </Paper>
                 </Grid>
             </Grid>
+            <Box>
+                <Typography variant="h5">Chat</Typography>
+                <Box
+                    sx={{
+                        maxHeight: '300px',
+                        maxWidth: '400px',
+                        width: '100%',
+                        overflowY: 'auto',
+                        mt: 2,
+                        mb: 2,
+                        p: 2,
+                        border: '1px solid #ccc',
+                        borderRadius: '8px',
+                        bgcolor: 'background.paper',
+                    }}
+                >
+                    {/* Messages de chat */}
+                    {chatMessages.map((msg, index) => (
+                        <Box
+                            key={index}
+                            sx={{
+                                display: 'flex',
+                                justifyContent: msg.user === currentUser ? 'flex-start' : 'flex-end',
+                                mb: 1,
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    bgcolor: msg.user === currentUser ? '#e0f7fa' : '#fce4ec',
+                                    color: msg.user === currentUser ? 'black' : 'darkgrey',
+                                    p: 1,
+                                    borderRadius: 2,
+                                }}
+                            >
+                                <Typography variant="caption" display="block" gutterBottom>
+                                    {msg.user}
+                                </Typography>
+                                <Typography variant="body2">{msg.message}</Typography>
+                            </Box>
+                        </Box>
+                    ))}
+                </Box>
+                <Box
+                    component="form"
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        maxWidth: '400px',
+                        width: '100%',
+                        mt: 2,
+                    }}
+                    onSubmit={sendChatMessage}
+                >
+                    <TextField
+                        fullWidth
+                        size="small"
+                        label="Votre message"
+                        variant="outlined"
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        sx={{ mr: 1 }}
+                    />
+                    <Button variant="contained" type="submit">Envoyer</Button>
+                </Box>
+            </Box>
         </Box>
     );
 };

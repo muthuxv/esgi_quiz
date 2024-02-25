@@ -15,6 +15,10 @@ module.exports = {
       description: {
         type: Sequelize.STRING
       },
+      user_id: {
+        allowNull: false,
+        type: Sequelize.UUID
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

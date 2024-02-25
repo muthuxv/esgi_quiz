@@ -11,7 +11,7 @@ import Login from './pages/security/Login';
 import Register from './pages/security/Register';
 import ForgotPassword from './pages/security/ForgotPassword';
 import ProtectedRoute from './components/ProtectedRoute';
-
+import FindQuizzes from './pages/FindQuizzes';
 
 function App() {
   return (
@@ -26,6 +26,7 @@ function App() {
           <Route path="/admin" element={<ProtectedRoute><AdminBoard /></ProtectedRoute>} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/find-quizzes" element={<ProtectedRoute><FindQuizzes /></ProtectedRoute>} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
         </Routes>
       </Router>

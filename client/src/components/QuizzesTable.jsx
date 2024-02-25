@@ -8,18 +8,18 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import { useNavigate } from "react-router-dom";
 import TablePagination from '@mui/material/TablePagination';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
 import Button from '@mui/material/Button';
 import { Alert } from '@mui/material';
 import SubdirectoryArrowRightIcon from '@mui/icons-material/SubdirectoryArrowRight';
 
-export default function QuizTable( { quizzes, handleDelete, handleRedirectToQuizz } ) {
+export default function QuizzesTable( { quizzes } ) {
+  const navigate = useNavigate();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [open, setOpen] = React.useState(false);
@@ -33,14 +33,9 @@ export default function QuizTable( { quizzes, handleDelete, handleRedirectToQuiz
     setPage(0);
   };
 
-  const handleDeleteClick = (id) => {
-    handleDelete(id);
-  }
-
-  const handleRedirectToQuizzClick = (id) => {
-    handleRedirectToQuizz(id);
-  }  
-
+  const handleRedirectToQuizz = async (id) => {
+    navigate(`/quiz/${id}`);
+  };
   
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden', boxShadow: 4 }}>
@@ -48,7 +43,6 @@ export default function QuizTable( { quizzes, handleDelete, handleRedirectToQuiz
         <Table stickyHeader aria-label="sticky table">
         <TableHead>
           <TableRow>
-            <TableCell />
             <TableCell>Titre</TableCell>
             <TableCell align="right">Description</TableCell>
             <TableCell align="right">Date de création</TableCell>
@@ -65,15 +59,6 @@ export default function QuizTable( { quizzes, handleDelete, handleRedirectToQuiz
           {quizzes.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((quizz) => (
             <>
             <TableRow key={quizz.id}>
-              <TableCell>
-              <IconButton
-                aria-label="expand row"
-                size="small"
-                onClick={() => setOpen(!open)}
-              >
-                {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-              </IconButton>
-              </TableCell>
               <TableCell component="th" scope="row">
                 {quizz.title}
               </TableCell>
@@ -84,54 +69,6 @@ export default function QuizTable( { quizzes, handleDelete, handleRedirectToQuiz
                 <Button aria-label="redirectToQuizz" onClick={() => handleRedirectToQuizz(quizz.id)}>
                   <SubdirectoryArrowRightIcon />
                 </Button>
-                <Button aria-label="edit">
-                  <EditIcon />
-                </Button>
-                <Button aria-label="delete" onClick={() => handleDeleteClick(quizz.id)}>
-                  <DeleteIcon />
-                </Button>
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-                <Collapse in={open} timeout="auto" unmountOnExit>
-                  <Box sx={{ margin: 1 }}>
-                    <Typography variant="h6" gutterBottom component="div">
-                      Questions
-                    </Typography>
-                    <Table size="small" aria-label="purchases">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Question</TableCell>
-                          <TableCell>Type</TableCell>
-                          <TableCell>Options</TableCell>
-                          <TableCell>Bonne réponse</TableCell>
-                          <TableCell>Actions</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {quizz.questions.map((question) => (
-                          <TableRow key={question.id}>
-                            <TableCell component="th" scope="row">
-                              {question.text}
-                            </TableCell>
-                            <TableCell>{question.type}</TableCell>
-                            <TableCell>{question.options.length}</TableCell>
-                            <TableCell><Alert>{question.options.filter(option => option.isCorrect).map(option => option.option_text).join(', ')}</Alert></TableCell>
-                            <TableCell>
-                              <Button aria-label="edit">
-                                <EditIcon />
-                              </Button>
-                              <Button aria-label="delete">
-                                <DeleteIcon />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </Box>
-                </Collapse>
               </TableCell>
             </TableRow>
             </>

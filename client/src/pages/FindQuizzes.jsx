@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Typography, Button, Grid, Box} from "@mui/material";
-import QuizTable from "../components/QuizTable";
+import QuizzesTable from "../components/QuizzesTable";
 import { useNavigate } from "react-router-dom";
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import QuizForm from "../components/forms/QuizForm";
 import { jwtDecode } from 'jwt-decode';
 
-const AdminBoard = () => {
+const FindQuizzes = () => {
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
     const [quizzes, setQuizzes] = useState([]);
@@ -17,7 +17,7 @@ const AdminBoard = () => {
 
     const fetchQuizzes = async () => {
         try {
-            const response = await fetch('http://localhost:3001/quizzes?user_id=' + jwtDecode(localStorage.getItem('token')).id);
+            const response = await fetch('http://localhost:3001/quizzes');
             const data = await response.json();
             setQuizzes(data);
         } catch (error) {
@@ -116,10 +116,7 @@ const AdminBoard = () => {
             </Box>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={12} md={12}>
-                    <QuizTable quizzes={quizzes} handleDelete={handleDelete} handleRedirectToQuizz={handleRedirectToQuizz}/>
-                    <Button variant="contained" color="secondary" sx={{ marginTop: '1em', boxShadow: '4' }} startIcon={<AddCircleOutlineOutlinedIcon />} onClick={handleClickOpen}>
-                        Créer un nouveau quiz
-                    </Button>
+                    <QuizzesTable quizzes={quizzes}/>
                 </Grid>
             </Grid>
             {open && <QuizForm open={open} handleClose={handleClose} handleCreate={handleCreate} />}
@@ -128,4 +125,4 @@ const AdminBoard = () => {
     );
 }
 
-export default AdminBoard;
+export default FindQuizzes;
