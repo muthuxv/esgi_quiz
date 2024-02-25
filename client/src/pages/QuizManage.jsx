@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import io from 'socket.io-client';
 //mui
-import { Button, Grid, Typography, Box, Paper, Card, CardContent, CardActions, CardHeader, Alert } from '@mui/material';
+import { Button, Grid, TextField, Typography, Box, Paper, Card, CardContent, CardActions, CardHeader, Alert } from '@mui/material';
 
 const Quiz = () => {
   const { id } = useParams();
@@ -12,6 +12,7 @@ const Quiz = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [connectedUsers, setConnectedUsers] = useState([]);
   const [socket, setSocket] = useState(null);
+  const [questionTime, setQuestionTime] = useState(30);
 
   useEffect(() => {
     const decoded = jwtDecode(localStorage.getItem('token'));
@@ -62,6 +63,11 @@ const Quiz = () => {
     }
   }, [id, navigate, socket]);
 
+  const handleChangeQuestionTime = () => {
+    socket.emit('changeQuestionTime', id, questionTime);
+    console.log(`Time changed to ${questionTime} seconds`);
+  };
+
   const handleStartQuiz = async () => {
     try {
       const response = await fetch(`http://localhost:3001/rooms`, {
@@ -110,6 +116,24 @@ const Quiz = () => {
                   ))}
                   <Button variant="contained" color="primary" onClick={handleStartQuiz}>
                     Start Quiz
+                  </Button>
+                </CardContent>
+              </Card>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Paper>
+              <Card>
+                <CardHeader title="Change Question Time" />
+                <CardContent>
+                  <TextField
+                    label="Time in seconds"
+                    type="number"
+                    value={questionTime}
+                    onChange={(e) => setQuestionTime(e.target.value)}
+                  />
+                  <Button variant="contained" color="primary" onClick={handleChangeQuestionTime}>
+                    Change Time
                   </Button>
                 </CardContent>
               </Card>
