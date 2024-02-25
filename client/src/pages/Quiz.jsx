@@ -15,13 +15,13 @@ const Quiz = () => {
 
   useEffect(() => {
     if (!socketRef.current) {
-      socketRef.current = io('http://localhost:3001');
+      socketRef.current = io('http://195.35.29.110:3001');
     }
 
     const checkQuizExists = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`http://localhost:3001/quizzes/${id}`);
+        const response = await fetch(`http://195.35.29.110:3001/quizzes/${id}`);
         if (response.ok) {
           const data = await response.json();
           if (data) {
@@ -59,15 +59,20 @@ const Quiz = () => {
       }
     });
 
-    return () => {
-      const token = localStorage.getItem('token');
+    
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
       if (socketRef.current && token) {
         const decoded = jwtDecode(token);
         const decodedUser = { login: decoded.login, id: decoded.id };
         socketRef.current.emit('leaveQuiz', id, decodedUser);
-        socketRef.current.close();
-        socketRef.current = null;
       }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [id, navigate]);
 
