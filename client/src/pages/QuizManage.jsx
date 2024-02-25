@@ -15,7 +15,7 @@ const Quiz = () => {
   console.log(decoded);
 
   useEffect(() => {
-    const newSocket = io('http://localhost:3001');
+    const newSocket = io('http://195.35.29.110:3001');
     setSocket(newSocket);
 
     newSocket.on('connect', () => {
@@ -34,7 +34,7 @@ const Quiz = () => {
     const checkQuizExists = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`http://localhost:3001/quizzes/${id}`);
+        const response = await fetch(`http://195.35.29.110:3001/quizzes/${id}`);
         if (response.ok) {
           const data = await response.json();
           if (data) {

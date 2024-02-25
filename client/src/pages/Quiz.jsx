@@ -13,7 +13,7 @@ const Quiz = () => {
     const checkQuizExists = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`http://localhost:3001/quizzes/${id}`);
+        const response = await fetch(`http://195.35.29.110:3001/quizzes/${id}`);
         if (response.ok) {
           const data = await response.json();
           if (data) {
@@ -33,7 +33,7 @@ const Quiz = () => {
     };
 
     checkQuizExists();
-    const socket = io('http://localhost:3001');
+    const socket = io('http://195.35.29.110:3001');
     const token = localStorage.getItem('token');
     if (token) {
       const decoded = jwtDecode(token);
