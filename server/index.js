@@ -43,8 +43,14 @@ io.on('connection', (socket) => {
 
   socket.on('joinQuiz', (quizId, user) => {
     socket.join(quizId);
-    console.log(user.login + " Has logged")
+    console.log(user.login + " has joined the quiz");
     io.to(quizId).emit('userJoined', user);
+  });
+
+  socket.on('startQuiz', (roomId, quizId) => {
+    console.log('Quiz has started:', roomId, quizId);
+    socket.join(roomId);
+    io.to(roomId).emit('quizStarted', roomId, quizId);
   });
 
   socket.on('leaveQuiz', (quizId, user) => {
