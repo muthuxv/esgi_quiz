@@ -30,7 +30,7 @@ const Game = () => {
         setCurrentUser(jwtDecode(token).login);
 
         if (!socketRef.current) {
-            socketRef.current = io('http://localhost:3001');
+            socketRef.current = io('http://195.35.29.110:3001');
         }
 
         socketRef.current.on('connect', () => {
@@ -64,6 +64,17 @@ const Game = () => {
             }
         });
 
+        const handleBeforeUnload = (e) => {
+            e.preventDefault();
+            if (socketRef.current && token) {
+                const decoded = jwtDecode(token);
+                const decodedUser = { login: decoded.login, quizId: decoded.id };
+                socketRef.current.emit('leaveQuiz', quizId, decodedUser);
+            }
+        };
+    
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
         socketRef.current.on('answerQuestion', (receivedRoomId, receivedQuizId, receivedQuestionId, receivedUser, receivedAnswer, receivedCount) => {
             if (receivedRoomId === roomId && receivedQuizId === quizId) {
               console.log("Time's up, moving to next question");
@@ -92,6 +103,7 @@ const Game = () => {
         });
 
         return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
             socketRef.current.off('updateOptionCounter');
             socketRef.current.off('chatMessage');
         };
@@ -111,7 +123,7 @@ const Game = () => {
         });
         // save the answer
         try {
-            const response = await fetch(`http://localhost:3001/responses`, {
+            const response = await fetch(`http://195.35.29.110:3001/responses`, {
               method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

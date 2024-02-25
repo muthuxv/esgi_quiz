@@ -61,7 +61,7 @@ app.use(cors());
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "http://195.35.29.110:3000",
     methods: ["GET", "POST"] 
   }
 });
@@ -109,10 +109,11 @@ io.on('connection', (socket) => {
     console.log('Next question:', roomId, quizId);
     socket.join(roomId);
 
-    fetch(`http://localhost:3001/quizzes/${quizId}`).then(response => {
+    fetch(`http://195.35.29.110:3001/quizzes/${quizId}`).then(response => {
       return response.json();
     }).then(data => {
       const questions = data.questions;
+      
 
       if (count >= questions.length) {
         console.log('Quiz has ended:', roomId, quizId);
