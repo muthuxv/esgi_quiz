@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 import { useParams } from 'react-router-dom';
-import { Box, Typography, Grid, Paper, Button, TextField } from '@mui/material';
+import { Box, Typography, Grid, Paper, Button, TextField, Alert } from '@mui/material';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,7 +16,9 @@ const Game = () => {
     const [optionCounters, setOptionCounters] = useState({});
     const [chatMessages, setChatMessages] = useState([]);
     const [chatInput, setChatInput] = useState('');
-    const currentUser = jwtDecode(localStorage.getItem('token')).login;
+    const [currentUser, setCurrentUser] = useState('');
+    const [notification, setNotification] = useState('');
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -25,6 +27,7 @@ const Game = () => {
             console.error('No token found');
             return;
         }
+        setCurrentUser(jwtDecode(token).login);
 
         if (!socketRef.current) {
             socketRef.current = io('http://localhost:3001');
@@ -33,10 +36,15 @@ const Game = () => {
         socketRef.current.on('connect', () => {
             console.log('Connected to server');
             socketRef.current.emit('nextQuestion', roomId, quizId, count);
+            setNotification('Le quiz a commencé');
         });
 
         socketRef.current.on('timer', (timeLeft) => {
             setTimer(timeLeft);
+        });
+
+        socketRef.current.on('timerWarning', (timeLeft) => {
+            setNotification(`Il reste ${timeLeft} secondes`);
         });
     
         socketRef.current.on('nextQuestion', (receivedQuizId, receivedQuestion, receivedCount) => {
@@ -46,9 +54,15 @@ const Game = () => {
                 setDisableAnswers(false);
                 setCount(receivedCount);
                 setTimer(30);
+                
+                if (receivedCount === 0) {
+                    setNotification('Le quiz a commencé');
+                } else {
+                    setNotification('Question suivante');
+                }
+
             }
         });
-        
 
         socketRef.current.on('answerQuestion', (receivedRoomId, receivedQuizId, receivedQuestionId, receivedUser, receivedAnswer, receivedCount) => {
             if (receivedRoomId === roomId && receivedQuizId === quizId) {
@@ -131,14 +145,28 @@ const Game = () => {
         setChatInput('');
     };
 
+    useEffect(() => {
+        if (notification) {
+            const timeout = setTimeout(() => {
+                setNotification('');
+            }, 3000);
+            return () => clearTimeout(timeout);
+        }
+    }, [notification]);
+
     return (
         <Box>
-            <Typography variant="h3">Game</Typography>
+            <Grid>
+                <Typography variant="h3" sx={{ mb: 2 }} gutterBottom>Quiz</Typography>
+            </Grid>
             <Grid container spacing={2}>
                 <Grid item xs={12}>
                     <Paper>
                         <Box p={2}>
-                            <Typography variant="h5">Time left: {timer} seconds</Typography>
+                            <Box sx={{ mb: 2, display: 'flex', gap: '25vw' }}>
+                                <Typography variant="h5">Time left: {timer} seconds</Typography>
+                                {notification && <Alert severity="info">{notification}</Alert>}
+                            </Box>
                             {question && (
                                 <>
                                     <Typography variant="h4">Question: {question.text}</Typography>

@@ -36,6 +36,10 @@ function startQuestionTimer(roomId, quizId, questionId, count) {
     timeLeft--;
     io.to(roomId).emit('timer', timeLeft);
 
+    if (timeLeft === 3) {
+      io.to(roomId).emit('timerWarning', timeLeft);
+    }
+
     if (timeLeft <= 0) {
       clearInterval(interval);
       console.log("Times up");

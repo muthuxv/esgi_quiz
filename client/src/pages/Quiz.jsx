@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import { jwtDecode } from 'jwt-decode';
+//mui
+import { Paper, Typography, Button, Grid, TextField, Container } from '@mui/material';
 
 const Quiz = () => {
   const { id } = useParams();
@@ -74,9 +76,19 @@ const Quiz = () => {
   }
 
   return (
-    <div>
-      {quizExists ? <div>Le quiz va commencer</div> : <div>Redirection...</div>}
-    </div>
+    <Container>
+      <Paper elevation={3} style={{ padding: '20px', marginTop: '20px', textAlign: 'center', color: 'primary', backgroundColor:'primary' }}>
+        {quizExists ? (
+          <Typography variant="h4" component="h1" style={{ color: 'primary' }}>
+            En attente du début du quiz...
+          </Typography>
+        ) : (
+          <Typography variant="h4" component="h1">
+            Le quiz n'existe pas.
+          </Typography>
+        )}  
+      </Paper>
+    </Container>
   );
 };
 
