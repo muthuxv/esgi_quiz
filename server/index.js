@@ -23,7 +23,7 @@ const questionTimers = new Map();
 const questionTimeByRoom = new Map();
 
 function startQuestionTimer(roomId, quizId, questionId, count) {
-  let timeLeft = 10;
+  let timeLeft = 30;
   if(questionTimeByRoom.get(quizId) > 0){
     timeLeft = questionTimeByRoom.get(quizId);
   }
@@ -108,7 +108,7 @@ io.on('connection', (socket) => {
 
       if (count >= questions.length) {
         console.log('Quiz has ended:', roomId, quizId);
-        io.to(roomId).emit('quizEnded', quizId);
+        io.to(roomId).emit('quizEnded', roomId, quizId);
         return;
       }
 

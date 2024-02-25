@@ -3,6 +3,7 @@ import io from 'socket.io-client';
 import { useParams } from 'react-router-dom';
 import { Box, Typography, Grid, Paper, Button } from '@mui/material';
 import { jwtDecode } from 'jwt-decode';
+import { useNavigate } from 'react-router-dom';
 
 const Game = () => {
     const { roomId, quizId } = useParams();
@@ -13,6 +14,7 @@ const Game = () => {
     const [disableAnswers, setDisableAnswers] = useState(false);
     const [timer, setTimer] = useState(30);
     const [optionCounters, setOptionCounters] = useState({});
+    const navigate = useNavigate();
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -62,10 +64,16 @@ const Game = () => {
             }
         });
 
+        socketRef.current.on('quizEnded', (receivedRoomId, receivedQuizId) => {
+            if (receivedRoomId === roomId && receivedQuizId === quizId) {
+                navigate(`/results/${roomId}/${quizId}`);
+            }
+        });
+
         return () => {
             socketRef.current.off('updateOptionCounter');
         };
-    }, [roomId, quizId, count, question]);
+    }, [roomId, quizId, count, question, navigate]);
 
     const handleOptionClick = async (selectedOption) => {
         const token = localStorage.getItem('token');
@@ -122,9 +130,9 @@ const Game = () => {
                                         <Button
                                             key={option.id}
                                             onClick={() => handleOptionClick(option)}
-                                            disabled={disableAnswers} // Désactiver le bouton basé sur l'état
+                                            disabled={disableAnswers}
                                             style={{
-                                                backgroundColor: disableAnswers ? '#e0e0e0' : '', // Griser le bouton si désactivé
+                                                backgroundColor: disableAnswers ? '#e0e0e0' : '',
                                                 color: disableAnswers ? '#9e9e9e' : '',
                                                 margin: '5px',
                                             }}
