@@ -22,7 +22,7 @@ let fetch;
 const questionTimers = new Map();
 
 function startQuestionTimer(roomId, quizId, questionId, count) {
-  let timeLeft = 5;
+  let timeLeft = 15;
 
   if (questionTimers.has(roomId)) {
     clearInterval(questionTimers.get(roomId));
@@ -53,7 +53,7 @@ app.use(cors());
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://195.35.29.110:3000",
+    origin: "http://localhost:3000",
     methods: ["GET", "POST"] 
   }
 });
@@ -70,6 +70,7 @@ app.use("/rooms", RoomRoutes);
 app.use("/responses", ResponseRoutes);
 app.use("/", SecurityRoutes);
 
+const optionCounters = new Map();
 
 io.on('connection', (socket) => {
   console.log('New client connected');
@@ -90,7 +91,7 @@ io.on('connection', (socket) => {
     console.log('Next question:', roomId, quizId);
     socket.join(roomId);
 
-    fetch(`http://195.35.29.110:3001/quizzes/${quizId}`).then(response => {
+    fetch(`http://localhost:3001/quizzes/${quizId}`).then(response => {
       return response.json();
     }).then(data => {
       console.log(data);
@@ -103,15 +104,29 @@ io.on('connection', (socket) => {
       }
 
       const questionId = questions[count].id;
+
+      optionCounters.set(questionId, {});
+
       startQuestionTimer(roomId, quizId, questionId, count);
       console.log('Emitting next question:', questions[count]);
 
       io.to(roomId).emit('nextQuestion', quizId, questions[count], count);
+      io.to(roomId).emit('resetOptionCounters');
     });
   });
 
   socket.on('answerQuestion', (roomId, quizId, questionId, user, answer, count) => {
     console.log('Answer question:', roomId, quizId, questionId, user, answer);
+    
+     if (!optionCounters.has(questionId)) {
+        optionCounters.set(questionId, {});
+    }
+    const counters = optionCounters.get(questionId);
+    counters[answer] = (counters[answer] || 0) + 1;
+    optionCounters.set(questionId, counters);
+    
+    io.to(roomId).emit('updateOptionCounter', questionId, counters);
+
     socket.join(roomId);
     socket.emit('questionAnswered', roomId, quizId, questionId, user, answer, count + 1);
   });

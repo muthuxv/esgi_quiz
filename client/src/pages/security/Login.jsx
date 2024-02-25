@@ -14,7 +14,7 @@ const Login = () => {
 
     async function handleLogin() {
         try {
-            const response = await fetch('http://195.35.29.110:3001/login', {
+            const response = await fetch('http://localhost:3001/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
