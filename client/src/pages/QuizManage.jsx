@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import io from 'socket.io-client';
+//mui
+import { Button, Grid, Typography, Box, Paper, Card, CardContent, CardActions, CardHeader, Alert } from '@mui/material';
 
 const Quiz = () => {
   const { id } = useParams();
@@ -11,24 +13,26 @@ const Quiz = () => {
   const [connectedUsers, setConnectedUsers] = useState([]);
   const [socket, setSocket] = useState(null);
 
-  const decoded = jwtDecode(localStorage.getItem('token'));
-  console.log(decoded);
-
   useEffect(() => {
+    const decoded = jwtDecode(localStorage.getItem('token'));
+    console.log(decoded);
+
     const newSocket = io('http://195.35.29.110:3001');
     setSocket(newSocket);
 
     newSocket.on('connect', () => {
-      const username = decoded.login;
-      newSocket.emit('joinQuiz', id, username);
-  });
+      const decodedUser = { login: decoded.login, id: decoded.id };
+      newSocket.emit('joinQuiz', id, decodedUser);
+    });
 
     newSocket.on('userJoined', (user) => {
-      setConnectedUsers(prevUsers => [...prevUsers, user]);
+      if (!connectedUsers.some((u) => u.id === user.id)) {
+        setConnectedUsers(prevUsers => [...prevUsers, user]);
+      }
     });
 
     return () => newSocket.close();
-  }, []);
+  }, [id, connectedUsers]);
 
   useEffect(() => {
     const checkQuizExists = async () => {
@@ -58,38 +62,73 @@ const Quiz = () => {
     }
   }, [id, navigate, socket]);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const handleStartQuiz = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/rooms`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ quiz_id: id }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        await Promise.all(connectedUsers.map(user =>
+          fetch(`http://localhost:3001/users/${user.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ room_id: data.id }),
+          })
+        ));
+        socket.emit('startQuiz', data.id, id);
+      } else {
+        console.error('Error while creating room:', response);
+      }
+    } catch (error) {
+      console.error('Error while creating room:', error);
+    }
+  };
 
   return (
-    <div>
-        <h2>Bienvenue sur votre quiz : {quizData.title}</h2>
-        {quizData && (
-          <table>
-            <thead>
-              <tr>
-                <th>Utilisateur</th>
-                {quizData.questions.map((question, index) => (
-                  <th key={index}>Question {index + 1}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {connectedUsers.map((user, userIndex) => (
-                <tr key={userIndex}>
-                  <td>{user}</td>
-                  {quizData.questions.map((question, questionIndex) => (
-                    <td key={questionIndex}>
-                        
-                    </td>
+    <>
+      {isLoading && <Alert severity="info">Loading...</Alert>}
+      {quizData && (
+        <>
+        <Typography variant="h4" sx={{ mb: 2 }}>Welcome to your quiz: {quizData.title}</Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={12} sm={6} md={4}>
+            <Paper>
+              <Card>
+                <CardHeader title="List of Participants" />
+                <CardContent>
+                  {connectedUsers.map((user, index) => (
+                    <Typography key={index} variant="body1" component="div">
+                      <Box>{user.login}</Box>
+                    </Typography>
                   ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-    </div>
+                  <Button variant="contained" color="primary" onClick={handleStartQuiz}>
+                    Start Quiz
+                  </Button>
+                </CardContent>
+              </Card>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Paper>
+              <Card>
+                <CardHeader title="Number of Questions" />
+                <CardContent>
+                  <Typography variant="body1">{quizData.questions.length}</Typography>
+                </CardContent>
+              </Card>
+            </Paper>
+          </Grid>
+        </Grid>
+        </>
+      )}
+    </>
   );
 };
 

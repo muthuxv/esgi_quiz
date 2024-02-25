@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 const Quiz = () => {
   const { id } = useParams();
@@ -37,17 +37,36 @@ const Quiz = () => {
     const token = localStorage.getItem('token');
     if (token) {
       const decoded = jwtDecode(token);
-      socket.emit('joinQuiz', id, decoded.login);
+      const decodedUser = { login: decoded.login, id: decoded.id };
+      socket.emit('joinQuiz', id, decodedUser);
     }
+
+    // Clean up function
     return () => {
       const token = localStorage.getItem('token');
       if (socket && token) {
-          const decoded = jwtDecode(token);
-          socket.emit('leaveQuiz', id, decoded.login);
-          socket.close();
+        const decoded = jwtDecode(token);
+        const decodedUser = { login: decoded.login, id: decoded.id };
+        socket.emit('leaveQuiz', id, decodedUser);
+        socket.close();
       }
     };
   }, [id, navigate]);
+
+  useEffect(() => {
+    const socket = io('http://localhost:3001');
+
+    socket.on('quizStarted', (roomId, quizId) => {
+      try {
+        console.log('Quiz has started:', roomId, quizId);
+        navigate(`play/${roomId}/${quizId}`);
+      } catch (error) {
+        console.error('Error navigating to play:', error);
+      }
+    });
+
+    return () => socket.close();
+  }, [navigate]);
 
   if (isLoading) {
     return <div>Loading...</div>;
