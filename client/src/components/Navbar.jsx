@@ -68,10 +68,14 @@ const Navbar = () => {
                         ) : (
                             <>
                                 {decodedToken.role === 'ROLE_ADMIN' && (
-                                    <li>Admin</li>
+                                    <li>
+                                        {decodedToken.login} - <span style={{ color: 'green' }}>Admin</span>
+                                    </li>
                                 )}
                                 {decodedToken.role === 'ROLE_USER' && (
-                                    <li>Utilisateur</li>
+                                    <li>
+                                        {decodedToken.login} - <span style={{ color: 'blue' }}>Utilisateur</span>
+                                    </li>
                                 )}
                                 <li>
                                     <IconButton onClick={handleMenu} size="large" sx={{ p: 0 }}>
